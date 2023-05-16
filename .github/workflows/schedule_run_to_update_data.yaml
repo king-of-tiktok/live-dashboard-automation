@@ -24,9 +24,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: setup environment
+      - name: setup environment and run script
         env:
           API_KEY_GITHUB: ${{ secrets.API_KEY_GITHUB }}
-
-      - name: execute py script # run main.py
         run: python hello.py
