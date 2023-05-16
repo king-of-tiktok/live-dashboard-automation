@@ -27,4 +27,4 @@ jobs:
       - name: setup environment and run script
         env:
           API_KEY_GITHUB: ${{ secrets.API_KEY_GITHUB }}
-        run: python hello.py
+        run: python Cohort_Analysis_Code.py
