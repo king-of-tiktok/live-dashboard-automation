@@ -16,10 +16,11 @@ import requests
 import time
 import datetime
 import math
+import os 
 
 """Step 1: Retrieve all closed prework issues to get all onboarded prework authors to date."""
 
-GitHib_token = "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"
+GitHib_token = os.environ["API_KEY_GITHUB"]
 
 # Retrieve all closed prework issues
 
