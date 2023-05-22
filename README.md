@@ -1,73 +1,54 @@
 # Hack for LA Onboarding Impact Analysis 
 
-Include a project description that explains **what** your project is and **why** it exists. Aim for no more than 3-5 concise sentences. For example, you might say:
-
-{Project Name} is a project of Hack for LA. Hack for LA is a brigade of a Code for America that exists to {your mission}. {Project Name} helps {target users} accomplish {goal of project}. The {app/site/thing you're building}'s main features include {very brief feature descriptions}.
+The Onboarding Impact Analysis is a data analytics project of Hack for LA to support decision-making to mazimize return-on-investment for onboarding efforts. Through this project, we analyze issues completed by onboarded developers (identified through closed prework issues) and identify patterns and insights in new developer behavior through various metrics and data visualizations in a Looker dashboard available on the Hack for LA website.
 
 ### Project context
 
-Civic projects often exist within a larger context that may include multiple stakeholders, historic relationships, associated research, or other details that are relevant but not *required* for direct contributions. Gathering these details in one place is useful, but the ReadMe isn't that place. Use this section to [link to a Google Doc](#) or other documentation repository where contributors can dig in if they so choose. This is also a good place to link to your Code of Conduct.
+By joining Hack for LA, new developers are provided basic training during onboarding and opportunities to improve their developer skills by working on volunteer projects made available by Hack for LA. A lot of time and effort is invested in onboarding new developers. Therefore, we want to ensure that we are allocating our time and resources properly to new developers invested in honing their skills and growing to seasoned developers. This project is a sub-component of [an issue](https://github.com/hackforla/website/issues/4152) that aims to automate the retrieval of GitHub issues by closed prework authors and maintain an updated data source for [Hack for LA's Looker dashboard](https://www.hackforla.org/dashboard/).
 
 ### Technology used
 
-- Each platform or framework should get its own bullet.
-- Each platform should include an [active link](#) to the official documentation.
-
-
+- Jupyter Notebook/ Google Colab for data retrieval, cleaning, and dataset creation script
+- GitHub Actions
+- Google Sheets API/App Scripts
+- Google Looker Studio
 
 # How to contribute
 
-Explain the different ways people can contribute. For example:
-
-- Join the team {on Slack/at our weekly hack night/etc}.
-- To help with user research, {do ABC}.
-- To provide design support, {do XYZ}.
-- To contribute to the code, follow the instructions below.
-
-Remember to provide direct links to each channel.
-
-
+None as of yet.
 
 ## Installation instructions
 
-1. Step-by-step instructions help new contributors get a development environment up and running quickly.
-2. You'll want to find the balance between being specific enough for novices to follow, without being so specific that you reinvent the wheel by providing overly-basic instructions that can be found elsewhere.
-3. Feel free to adapt this section and its sub-sections to your own processes.
-4. Alternatively, you can move everything from *Installation instructions* through *Testing* to a separate **Contributing.md** file to keep your **ReadMe.md** more succinct.
+N/A
 
 
 ### Working with issues
 
-- Explain how to submit a bug.
-- Explain how to submit a feature request.
-- Explain how to contribute to an existing issue.
-
-To create a new issue, please use the blank issue template (available when you click New Issue).  If you want to create an issue for other projects to use, please create the issue in your own repository and send a slack message to one of your hack night hosts with the link.
+N/A
 
 
 ### Working with forks and branches
 
-- Explain your guidelines here.
+Follow Hack for LA's [Contributing.md guidelines/instructions](https://github.com/hackforla/website/blob/gh-pages/CONTRIBUTING.md#part-1-setting-up-the-development-environment).
 
 
 ### Working with pull requests and reviews
 
-- Explain your process.
+N/A
 
 
 ### Testing
 
-- Provide instructions.
+N/A
 
 
 
 # Contact info
 
-Include at least one way (or more, if possible) to reach your team with questions or comments.
+Main person working on this issue: Kimberly Tan
+Contact email: kimberly.tan.yh@gmail.com
 
 
 ### Licensing
 
-Include details about the project's open source status.
-
-*this readme file sourced from [Jessica Sand](http://jessicasand.com/other-stuff/just-enough-docs/)*
+None as of yet.
