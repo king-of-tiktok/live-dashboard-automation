@@ -2112,18 +2112,9 @@ missing_dependency = missing_dependency.iloc[:, [1,4,2,3,0]]
 
 # In[268]:
 
-from IPython import get_ipython
-get_ipython().system('pip install --upgrade google-auth')
-get_ipython().system('pip install --upgrade google-api-python-client')
-get_ipython().system('pip install --upgrade google-auth-httplib2')
-get_ipython().system('pip install --upgrade google-auth-oauthlib')
-get_ipython().system('pip install gspread-dataframe')
-
 
 # In[269]:
 
-
-get_ipython().system('pip install pydrive')
 from google.oauth2 import service_account
 from gspread_dataframe import set_with_dataframe
 from googleapiclient.discovery import build
