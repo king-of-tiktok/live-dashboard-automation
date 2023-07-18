@@ -2,7 +2,7 @@ name: run main.py
 
 on:
   # schedule:
-  #   - cron: '5 0 * * *' # At 00:05 Daily
+  #   - cron: '5 0-23/3 * * *' # At minute 5 past every 3rd hour starting from 12:05AM
   push:
     branches:
     - main
@@ -28,3 +28,6 @@ jobs:
         env:
           API_KEY_GITHUB: ${{ secrets.API_KEY_GITHUB }}
         run: python Cohort_Analysis_Code.py
+        env:
+          API_KEY_GITHUB_PROJECTBOARD_DASHBOARD: ${{ secrets.API_KEY_GITHUB_PROJECTBOARD_DASHBOARD }}
+        run: python ProjectBoard_Dashboard_Code.py
