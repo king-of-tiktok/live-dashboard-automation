@@ -23,12 +23,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          get_ipython().system('pip install --upgrade google-auth')
-          get_ipython().system('pip install --upgrade google-api-python-client')
-          get_ipython().system('pip install --upgrade google-auth-httplib2')
-          get_ipython().system('pip install --upgrade google-auth-oauthlib')
-          get_ipython().system('pip install gspread-dataframe')
-          get_ipython().system('pip install pydrive')
+          pip install --upgrade google-auth
+          pip install --upgrade google-api-python-client
+          pip install --upgrade google-auth-httplib2
+          pip install --upgrade google-auth-oauthlib
+          pip install gspread-dataframe
+          pip install pydrive
 
       - name: setup environment and run script
         env:
