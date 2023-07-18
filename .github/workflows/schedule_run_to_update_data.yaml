@@ -1,4 +1,4 @@
-name: run Project_Board_Dashboard_Script.py
+name: run main.py
 
 on:
   # schedule:
