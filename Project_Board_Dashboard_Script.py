@@ -2111,7 +2111,7 @@ missing_dependency = missing_dependency.iloc[:, [1,4,2,3,0]]
 # ### Send to Google Sheet
 
 # In[268]:
-
+!pip install ipython
 from IPython import get_ipython
 get_ipython().system('pip install --upgrade google-auth')
 get_ipython().system('pip install --upgrade google-api-python-client')
