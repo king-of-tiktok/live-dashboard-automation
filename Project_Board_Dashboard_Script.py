@@ -3,7 +3,7 @@
 
 # In[1]:
 
-
+import os
 import requests
 import pandas as pd
 import numpy as np
