@@ -1,4 +1,4 @@
-name: run main.py
+name: run Project_Board_Dashboard_Script.py
 
 on:
   # schedule:
@@ -26,8 +26,5 @@ jobs:
 
       - name: setup environment and run script
         env:
-          API_KEY_GITHUB: ${{ secrets.API_KEY_GITHUB }}
-        run: python Cohort_Analysis_Code.py
-        env:
           API_KEY_GITHUB_PROJECTBOARD_DASHBOARD: ${{ secrets.API_KEY_GITHUB_PROJECTBOARD_DASHBOARD }}
-        run: python ProjectBoard_Dashboard_Code.py
+        run: python Project_Board_Dashboard_Script.py
