@@ -2112,7 +2112,7 @@ missing_dependency = missing_dependency.iloc[:, [1,4,2,3,0]]
 
 # In[268]:
 
-
+from iPython import get_ipython
 get_ipython().system('pip install --upgrade google-auth')
 get_ipython().system('pip install --upgrade google-api-python-client')
 get_ipython().system('pip install --upgrade google-auth-httplib2')
