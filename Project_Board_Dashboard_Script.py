@@ -2134,6 +2134,18 @@ import gspread
 scopes = ['https://www.googleapis.com/auth/spreadsheets',
           'https://www.googleapis.com/auth/drive']
 
+import base64
+
+key_base64 = os.environ["BASE64_PROJECT_BOARD_GOOGLECREDENTIAL"]
+base64_bytes = key_base64.encode('ascii')
+key_base64_bytes = base64.b64decode(base64_bytes)
+key_content = key_base64.decode('ascii')
+
+key_data = json.loads(key_content)
+
+with open('issue_availability_key.json', 'w') as file:
+    json.dump(key_data, file)
+
 SERVICE_ACCOUNT_FILE = "issue-availability-key.json"
 credentials = service_account.Credentials.from_service_account_file(
     filename = SERVICE_ACCOUNT_FILE, scopes = scopes
