@@ -29,9 +29,14 @@ jobs:
           pip install --upgrade google-auth-oauthlib
           pip install gspread-dataframe
           pip install pydrive
+          
+      # authenticating with Gcloud 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.BASE64_PROJECT_BOARD_GOOGLECREDENTIAL }}
 
       - name: setup environment and run script
         env:
           API_KEY_GITHUB_PROJECTBOARD_DASHBOARD: ${{ secrets.API_KEY_GITHUB_PROJECTBOARD_DASHBOARD }}
-          BASE64_PROJECT_BOARD_GOOGLECREDENTIAL: ${{ secrets.BASE64_PROJECT_BOARD_GOOGLECREDENTIAL }}
         run: python Project_Board_Dashboard_Script.py
