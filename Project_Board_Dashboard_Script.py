@@ -2029,27 +2029,6 @@ final_dataset.loc[final_dataset[final_dataset["Complexity Label"] == "Complexity
 
 anomaly_detection = pd.concat([icebox_issues_df3, ER_issues_df3, NIA_issues_df3, pb_issues_df3, ip_issues_df3, questions_issues_df3, QA_issues_df3, UAT_issues_df3, QA_review_issues_df3], ignore_index = True)
 
-# In[257]:
-
-
-# Note: "prework" and "Complexity: Good second issue" were not included
-
-existing_labels = ["size: not counted", "size: 0.5pt", "size: 0.25pt", "size: 1pt", "size: 2pt", "size: 3pt", "size: 5pt", "size: 8pt", "size: 13+pt", "size: missing", "role: back end/devOps", 
-                   "role: design", "role: front end", "role: hfla leadership", "role: infrastructure", "role: legal", "role missing", "role: product", "role: user research", 
-                   "role: writing", "role: dev leads", "role: BA", "role: Research Lead", "role: design lead", "role: data analyst", "role: Org Rep", "role: technical writer",
-                   "Complexity: Large", "Complexity: Medium", "Complexity: Small", "Complexity: Missing", "Complexity: 0.5pt", "Complexity: 1pt", "Complexity: 2pt", "Complexity: 3pt", 
-                   "Complexity: 5pt", "Complexity: 8pt", "Complexity: 13+pt", "good first issue", "Complexity: not counted", "Complexity: 0.25pt", "Complexity: Prework", 
-                   "Complexity: See issue making label", "Feature: Accessibility", "Feature: Administrative", "Feature: Analytics", "Feature: Board/GitHub Maintenance", 
-                   "Feature: Design system", "Feature: Feature Branch", "Feature: Google Apps Scripts", "Feature: Infrastructure", "Feature Missing", "Feature: Onboarding/Contributing.md", 
-                   "Feature: Refactor CSS", "Feature: Refactor GHA", "Feature: Refactor HTML", "Feature: Refactor JS / Liquid", "feature: research plan", "feature: stakeholder updates", 
-                   "Feature: Standards", "Feature: Tables", "Feature: Wiki", "P-Feature: Citizen Engagement", "P-Feature: Communities of Practice", "P-Feature: Contact forms w usability research", 
-                   "P-Feature: Contributors", "P-Feature: Credit", "P-Feature: Dashboard", "P-Feature: Donate", "P-Feature: Events", "P-Feature: Footer", "P-Feature: Getting Started", 
-                   "P-Feature: Home page", "P-Feature: Impact", "P-Feature: Join Page", "p-Feature: Mobile", "P-Feature: Navigation", "P-Feature: Open roles", "P-Feature: Organizational Page", 
-                   "P-Feature: Privacy Policy", "P-Feature: Program Area", "P-Feature: Project Info and Page", "P-Feature: Project Meetings", "P-Feature: Projects page", "P-Feature: Sitemap", 
-                   "P-Feature: Toolkit", "P-Feature: About Us", "P-Feature: Wins Page", "P-Feature: 404 page", "feature: research", "Feature: Video Research", "feature: Survey", "P-Feature: Related Collateral", 
-                   "p-Feature: SDG page", "Feature: Docker", "feature: code of conduct", "p-feature: member profile", "p-feature: Projects-check", "p-feature: SDGs"]
-
-
 # In[259]:
 
 
@@ -2067,11 +2046,59 @@ anomaly_detection_df = anomaly_detection[anomaly_detection["keep"] == 1]
 
 anomaly_detection_df.drop(columns = ["keep"], inplace = True)
 
+# In[263]:
+
+from google.oauth2 import service_account
+from gspread_dataframe import set_with_dataframe
+from googleapiclient.discovery import build
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+
+import gspread
+import base64
+
+scopes = ['https://www.googleapis.com/auth/spreadsheets',
+          'https://www.googleapis.com/auth/drive']
+
+## Read in offical GitHub labels from Google spreadsheet for weekly label check table
+
+key_base64 = os.environ["BASE64_PROJECT_BOARD_GOOGLECREDENTIAL"]
+base64_bytes = key_base64.encode('ascii')
+key_base64_bytes = base64.b64decode(base64_bytes)
+key_content = key_base64_bytes.decode('ascii')
+
+service_account_info = json.loads(key_content)
+
+credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes = scopes)
+
+service_sheets = build('sheets', 'v4', credentials = credentials)
+print(service_sheets)
+
+gc = gspread.authorize(credentials)
+
+gauth = GoogleAuth()
+drive = GoogleDrive(gauth)
+
+from gspread_dataframe import set_with_dataframe
+
+LabelCheck_GOOGLE_SHEETS_ID = '1-ltg0qMeZSgOnqrCU0nKUDQd1JOXTMWrNTK63VZjXdk'
+
+LabelCheck_sheet_name = 'Official GitHub Labels'
+
+gs = gc.open_by_key(LabelCheck_GOOGLE_SHEETS_ID)
+
+LabelCheck_worksheet = gs.worksheet(LabelCheck_sheet_name)
+
+LC_spreadsheet_data = LabelCheck_worksheet.get_all_records()
+LC_df = pd.DataFrame.from_dict(LC_spreadsheet_data)
+official_labels = list(LC_df["label_name"].unique())
+
+outdated_labels = list(LC_df[LC_df["in_use?"] == "No"]["label_name"].unique())
 
 # In[264]:
 
 
-anomaly_detection_df["labels_need_action"] = anomaly_detection_df["labels.name"].map(lambda x: 1 if x not in existing_labels else 0)
+anomaly_detection_df["labels_need_action"] = anomaly_detection_df["labels.name"].map(lambda x: 1 if (x not in official_labels or x in outdated_labels) else 0)
 anomaly_detection_df = anomaly_detection_df.iloc[:, [4,1,2,3,0,5]]
 
 
@@ -2104,66 +2131,24 @@ anomaly_detection_df2 = anomaly_detection_df2.merge(anomaly_detection_df2_join, 
 # In[267]:
 
 
-missing_dependency = anomaly_detection[anomaly_detection["labels.name"] == "dependency missing"]
+missing_dependency = anomaly_detection[(anomaly_detection["labels.name"] == "dependency missing" & anomaly_detection["Project Board Column"] == "1 - Icebox")]
 
 missing_dependency = missing_dependency.iloc[:, [1,4,2,3,0]]
 
+if len(missing_dependency) == 0:
+    missing_dependency.append(pd.Series(), ignore_index=True)
+else:
+    missing_dependency
+
 # ### Send to Google Sheet
-
-# In[268]:
-
-
-# In[269]:
-
-from google.oauth2 import service_account
-from gspread_dataframe import set_with_dataframe
-from googleapiclient.discovery import build
-from pydrive.auth import GoogleAuth
-from pydrive.drive import GoogleDrive
-
-
-# In[270]:
-
-
-import gspread
-
-
-# In[271]:
-
-
-scopes = ['https://www.googleapis.com/auth/spreadsheets',
-          'https://www.googleapis.com/auth/drive']
-
-import base64
-
-key_base64 = os.environ["BASE64_PROJECT_BOARD_GOOGLECREDENTIAL"]
-base64_bytes = key_base64.encode('ascii')
-key_base64_bytes = base64.b64decode(base64_bytes)
-key_content = key_base64_bytes.decode('ascii')
-
-service_account_info = json.loads(key_content)
-
-credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes = scopes)
-
-service_sheets = build('sheets', 'v4', credentials = credentials)
-print(service_sheets)
-
-gc = gspread.authorize(credentials)
-
-gauth = GoogleAuth()
-drive = GoogleDrive(gauth)
-
 
 # In[272]:
 
-
-from gspread_dataframe import set_with_dataframe
-
-GOOGLE_SHEETS_ID = '1aJ0yHkXYMWTtMz6eEeolTLmAQOBc2DyptmR5SAmUrjM'
+Main_GOOGLE_SHEETS_ID = '1aJ0yHkXYMWTtMz6eEeolTLmAQOBc2DyptmR5SAmUrjM'
 
 sheet_name1 = 'Dataset 2'
 
-gs = gc.open_by_key(GOOGLE_SHEETS_ID)
+gs = gc.open_by_key(Main_GOOGLE_SHEETS_ID)
 
 worksheet1 = gs.worksheet(sheet_name1)
 
