@@ -2131,7 +2131,7 @@ anomaly_detection_df2 = anomaly_detection_df2.merge(anomaly_detection_df2_join, 
 # In[267]:
 
 
-missing_dependency = anomaly_detection[(anomaly_detection["labels.name"] == "dependency missing" & anomaly_detection["Project Board Column"] == "1 - Icebox")]
+missing_dependency = anomaly_detection[(anomaly_detection["labels.name"] == "dependency missing") & (anomaly_detection["Project Board Column"] == "1 - Icebox")]
 
 missing_dependency = missing_dependency.iloc[:, [1,4,2,3,0]]
 
@@ -2169,7 +2169,6 @@ set_with_dataframe(worksheet = worksheet1, dataframe = final_dataset, include_in
 
 # In[275]:
 
-
 sheet_name2 = 'Labels to note'
 worksheet2 = gs.worksheet(sheet_name2)
 worksheet2.clear()
@@ -2178,7 +2177,6 @@ set_with_dataframe(worksheet = worksheet2, dataframe = anomaly_detection_df, inc
 
 # In[276]:
 
-
 sheet_name3 = 'Missing Labels'
 worksheet3 = gs.worksheet(sheet_name3)
 worksheet3.clear()
@@ -2186,7 +2184,6 @@ set_with_dataframe(worksheet = worksheet3, dataframe = anomaly_detection_df2, in
 
 
 # In[277]:
-
 
 sheet_name4 = 'Missing Dependency Issues'
 worksheet4 = gs.worksheet(sheet_name4)
