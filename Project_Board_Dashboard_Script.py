@@ -2136,7 +2136,7 @@ missing_dependency = anomaly_detection[(anomaly_detection["labels.name"] == "dep
 missing_dependency = missing_dependency.iloc[:, [1,4,2,3,0]]
 
 if len(missing_dependency) == 0:
-    missing_dependency.iloc[0] = [" "," "," "," "," "]
+    missing_dependency.loc[0] = [" "," "," "," "," "]
 else:
     missing_dependency
 
