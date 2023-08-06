@@ -308,7 +308,7 @@ icebox_issues_df3["Project Board Column"] = "1 - Icebox"
 # In[31]:
 
 
-complexity_labels = ["Complexity: Prework", "Complexity: Missing", "Complexity: Large", "Complexity: Small", "good first issue", "Complexity: Medium", "Complexity: See issue making label"]
+complexity_labels = ["Complexity: Prework", "Complexity: Missing", "Complexity: Large", "Complexity: Small", "good first issue", "Complexity: Medium", "Complexity: See issue making label", "prework", "Complexity: Good second issue"]
 
 
 # In[32]:
