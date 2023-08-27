@@ -1,0 +1,38 @@
+name: run main.py
+
+on:
+  schedule:
+    - cron: '5 0-23/3 * * *' # At minute 5 past every 3rd hour starting from 12:05AM
+  workflow_dispatch:
+  push:
+    branches:
+    - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo content
+        uses: actions/checkout@v3 # checkout the repository content
+
+      - name: setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10' # install the python version needed
+
+      - name: install python packages
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install --upgrade google-auth
+          pip install --upgrade google-api-python-client
+          pip install --upgrade google-auth-httplib2
+          pip install --upgrade google-auth-oauthlib
+          pip install gspread-dataframe
+          pip install pydrive
+
+      - name: setup environment and run script
+        env:
+          API_KEY_GITHUB_PROJECTBOARD_DASHBOARD: ${{ secrets.API_KEY_GITHUB_PROJECTBOARD_DASHBOARD }}
+          BASE64_PROJECT_BOARD_GOOGLECREDENTIAL: ${{ secrets.BASE64_PROJECT_BOARD_GOOGLECREDENTIAL }}
+        run: python Project_Board_Dashboard_Script.py
