@@ -3,6 +3,7 @@
 
 # In[1]:
 
+
 import os
 import requests
 import pandas as pd
@@ -21,10 +22,12 @@ GitHub_token = os.environ["API_KEY_GITHUB_PROJECTBOARD_DASHBOARD"]
 user = 'kimberlytanyh'
 
 
-# ### Get Cards in Ice Box
+# ### Get Cards in Project Board Columns
 
 # In[3]:
 
+
+### Get Cards in Ice Box
 
 url = 'https://api.github.com/projects/columns/7198227/cards'
 headers = {"Authorization": GitHub_token}
@@ -40,10 +43,10 @@ for i in range(1, 11):
         break
 
 
-# ### Get Cards in ER Column
+# In[4]:
 
-# In[5]:
 
+### Get Cards in ER Column
 
 url = 'https://api.github.com/projects/columns/19403960/cards'
 headers = {"Authorization": GitHub_token}
@@ -59,10 +62,10 @@ for i in range(1, 11):
         break
 
 
-# ### Get Cards in New Issue Approval Column
+# In[5]:
 
-# In[7]:
 
+### Get Cards in New Issue Approval Column
 
 url = 'https://api.github.com/projects/columns/15235217/cards'
 headers = {"Authorization": GitHub_token}
@@ -77,10 +80,11 @@ for i in range(1, 11):
     else: 
         break
 
-# ### Get Cards in Prioritized Backlog Column
 
-# In[9]:
+# In[6]:
 
+
+### Get Cards in Prioritized Backlog Column
 
 url = 'https://api.github.com/projects/columns/7198257/cards'
 headers = {"Authorization": GitHub_token}
@@ -96,10 +100,10 @@ for i in range(1, 11):
         break
 
 
-# ### Get Cards in "In Progress (Actively Working)" Column
+# In[7]:
 
-# In[11]:
 
+### Get Cards in "In Progress (Actively Working)" Column
 
 url = 'https://api.github.com/projects/columns/7198228/cards'
 headers = {"Authorization": GitHub_token}
@@ -114,10 +118,11 @@ for i in range(1, 11):
     else: 
         break
 
-# ### Get Cards in Questions/In Review Column
 
-# In[13]:
+# In[8]:
 
+
+### Get Cards in Questions/In Review Column
 
 url = 'https://api.github.com/projects/columns/8178690/cards'
 headers = {"Authorization": GitHub_token}
@@ -133,10 +138,10 @@ for i in range(1, 11):
         break
 
 
-# ### Get Cards in QA Column
+# In[9]:
 
-# In[15]:
 
+### Get Cards in QA Column
 
 url = 'https://api.github.com/projects/columns/15490305/cards'
 headers = {"Authorization": GitHub_token}
@@ -152,10 +157,10 @@ for i in range(1, 11):
         break
 
 
-# ### Get Cards in UAT Column
+# In[10]:
 
-# In[17]:
 
+### Get Cards in UAT Column
 
 url = 'https://api.github.com/projects/columns/17206624/cards'
 headers = {"Authorization": GitHub_token}
@@ -171,10 +176,10 @@ for i in range(1, 11):
         break
 
 
-# ### Get Cards in "QA - senior review" Column
+# In[11]:
 
-# In[19]:
 
+### Get Cards in "QA - senior review" Column
 
 url = 'https://api.github.com/projects/columns/19257634/cards'
 headers = {"Authorization": GitHub_token}
@@ -190,16 +195,14 @@ for i in range(1, 11):
         break
 
 
-# ### Get Issue Links in Ice Box and Get Issue Data
+# ### Get Issue Links in Project Board Columns
 
-# In[21]:
+# In[12]:
 
+
+### Get Issue Links in Ice Box and Get Issue Data
 
 icebox_issues = list(ice_box[~ice_box['content_url'].isna()]['content_url'])  
-
-
-# In[22]:
-
 
 icebox_issues_df = pd.DataFrame()
 
@@ -214,11 +217,7 @@ except ValueError:
         response = requests.get(url, auth=(user, GitHub_token))
         issue_data = pd.json_normalize(response.json())
         icebox_issues_df = pd.concat([icebox_issues_df, issue_data], ignore_index = True)
-
-
-# In[23]:
-
-
+        
 from datetime import datetime
 import pytz
 
@@ -234,10 +233,9 @@ print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
 icebox_issues_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
 
 
-# In[24]:
+# In[13]:
 
 
-# Drop unneeded columns
 icebox_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comments_url', 'events_url', 'id',
  'node_id', 'number', 'state', 'locked', 'assignee', 'assignees', 'comments', 'created_at',
  'updated_at', 'closed_at', 'author_association', 'active_lock_reason', 'body', 'closed_by',
@@ -267,7 +265,7 @@ icebox_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comment
  'closed_by.events_url', 'closed_by.received_events_url', 'closed_by.type', 'closed_by.site_admin'], inplace = True)
 
 
-# In[25]:
+# In[14]:
 
 
 # Flatten labels column
@@ -276,57 +274,58 @@ flatten_icebox = icebox_issues_df.to_json(orient = "records")
 parsed_icebox = json.loads(flatten_icebox)
 icebox_issues_df2 = pd.json_normalize(parsed_icebox, record_path = ["labels"], record_prefix = "labels.", meta = ["Runtime", "html_url", "title"])
 
-
-# In[26]:
-
-
 icebox_issues_df2.drop(columns = ['labels.id', 'labels.node_id', 'labels.url', 'labels.description',
        'labels.color', 'labels.default'], inplace = True)
 
-
-# In[27]:
-
-
+# Remove issues with ignore labels in icebox column
 if len([label for label in icebox_issues_df2["labels.name"].unique() if re.search('ignore', label.lower())])>0:
     remove = list(icebox_issues_df2[icebox_issues_df2["labels.name"].str.contains("gnore")]["html_url"])
     icebox_issues_df2 = icebox_issues_df2[~icebox_issues_df2["html_url"].isin(remove)]
 else:
     remove = []
 
-
-# In[28]:
-
-
+# Finishing touches for icebox dataset (include issues with no labels)
 icebox_difference = list(set(icebox_issues_df["html_url"]).difference(set(icebox_issues_df2["html_url"])))
 icebox_no_labels = list(set(icebox_difference).difference(set(remove)))
 icebox_no_labels_df = icebox_issues_df[icebox_issues_df["html_url"].isin(icebox_no_labels)][["Runtime", "html_url", "title"]]
 icebox_no_labels_df["labels.name"] = ""
 icebox_no_labels_df = icebox_no_labels_df.iloc[:, [3,0,1,2]]
-icebox_issues_df3 = icebox_issues_df2.append(icebox_no_labels_df)
+
+# CHANGES MADE HERE!!!!!
+icebox_issues_df3 = pd.concat([icebox_issues_df2, icebox_no_labels_df], ignore_index = True)
+############################################################################################
+
 icebox_issues_df3["Project Board Column"] = "1 - Icebox"
 
-# In[31]:
+
+# ### Digress: Create Variables with List of Complexity Labels and Status Breakdowns
+
+# In[15]:
 
 
-complexity_labels = ["Complexity: Prework", "Complexity: Missing", "Complexity: Large", "Complexity: Extra Large", "Complexity: Small", "good first issue", "Complexity: Medium", "Complexity: See issue making label", "prework", "Complexity: Good second issue"]
+complexity_labels = ["Complexity: Prework", "Complexity: Missing", "Complexity: Large", 
+                     "Complexity: Extra Large", "Complexity: Small", "good first issue", 
+                     "Complexity: Medium", "Complexity: See issue making label", "prework", 
+                     "Complexity: Good second issue"]
 
 
-# In[32]:
+# In[16]:
 
 
-extra_breakdown = ["Draft", "2 weeks inactive", "ready for product", "ready for dev lead", "Ready for Prioritization"]
+extra_breakdown = ["Draft", "2 weeks inactive", "ready for product", 
+                   "ready for dev lead", "Ready for Prioritization"]
 
 
-# In[33]:
+# ### Back to Getting Issue Links and Creating Datasets for Each Project Board Column
 
+# In[17]:
+
+
+#### Finish up creating Icebox dataset
 
 # retain only labels with "role" in it or complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 final_icebox = icebox_issues_df2[(icebox_issues_df2["labels.name"].str.contains("role") | icebox_issues_df2["labels.name"].isin(complexity_labels) | 
                           icebox_issues_df2["labels.name"].isin(extra_breakdown))]
-
-
-# In[34]:
-
 
 # Make combined label for issues with front and backend labels
 icebox_wdataset = final_icebox[final_icebox["labels.name"].str.contains("front end") | final_icebox["labels.name"].str.contains("back end")]
@@ -334,27 +333,17 @@ icebox_wdataset["front/back end count"] = icebox_wdataset.groupby(["html_url", "
 
 final_icebox.loc[list(icebox_wdataset[icebox_wdataset["front/back end count"] == 2].index), "labels.name"] = "role: front end and backend/DevOps"
 
-
-# In[35]:
-
-
 final_icebox.drop_duplicates(inplace = True)
-
-
-# In[36]:
-
 
 final_icebox2 = final_icebox[["Runtime", "labels.name", "html_url", "title"]]
 
-# ### Get Issue Links in ER Column and Get Issue Data
 
-# In[39]:
+# In[18]:
 
+
+### Get Issue Links in ER Column and Get Issue Data
 
 er_issues = list(er[~er['content_url'].isna()]['content_url'])  
-
-# In[40]:
-
 
 ER_issues_df = pd.DataFrame()
 
@@ -370,10 +359,6 @@ except ValueError:
         issue_data = pd.json_normalize(response.json())
         ER_issues_df = pd.concat([ER_issues_df, issue_data], ignore_index = True)
 
-
-# In[41]:
-
-
 # Get the timezone object for New York
 tz_LA = pytz.timezone('US/Pacific') 
 
@@ -384,10 +369,6 @@ datetime_LA = datetime.now(tz_LA)
 print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
 
 ER_issues_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
-
-
-# In[42]:
-
 
 # Drop unneeded columns
 ER_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comments_url', 'events_url', 'id',
@@ -418,10 +399,6 @@ ER_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comments_ur
  'closed_by.starred_url', 'closed_by.subscriptions_url', 'closed_by.organizations_url', 'closed_by.repos_url',
  'closed_by.events_url', 'closed_by.received_events_url', 'closed_by.type', 'closed_by.site_admin'], inplace = True)
 
-
-# In[43]:
-
-
 # Flatten labels column
 
 flatten_ER = ER_issues_df.to_json(orient = "records")
@@ -429,44 +406,32 @@ parsed_ER = json.loads(flatten_ER)
 ER_issues_df2 = pd.json_normalize(parsed_ER, record_path = ["labels"], record_prefix = "labels.", meta = ["Runtime", "html_url", "title"])
 
 
-# In[44]:
-
-
 ER_issues_df2.drop(columns = ['labels.id', 'labels.node_id', 'labels.url', 'labels.description',
        'labels.color', 'labels.default'], inplace = True)
 
-
-# In[45]:
-
-
+# Remove issues with ignore labels in ER column
 if len([label for label in ER_issues_df2["labels.name"].unique() if re.search('ignore', label.lower())])>0:
     remove = list(ER_issues_df2[ER_issues_df2["labels.name"].str.contains("gnore")]["html_url"])
     ER_issues_df2 = ER_issues_df2[~ER_issues_df2["html_url"].isin(remove)]
 else:
     remove = []
 
-
-# In[47]:
-
-
+# Finishing touches for ER dataset (include issues with no labels)
 ER_difference = list(set(ER_issues_df["html_url"]).difference(set(ER_issues_df2["html_url"])))
 ER_no_labels = list(set(ER_difference).difference(set(remove)))
 ER_no_labels_df = ER_issues_df[ER_issues_df["html_url"].isin(ER_no_labels)][["Runtime", "html_url", "title"]]
 ER_no_labels_df["labels.name"] = ""
 ER_no_labels_df = ER_no_labels_df.iloc[:, [3,0,1,2]]
-ER_issues_df3 = ER_issues_df2.append(ER_no_labels_df)
+
+# CHANGES MADE HERE!!!!!
+ER_issues_df3 = pd.concat([ER_issues_df2, ER_no_labels_df], ignore_index = True)
+########################################################################################
+
 ER_issues_df3["Project Board Column"] = "2- ER"
-
-# In[51]:
-
 
 # retain only labels with "role" in it or complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 final_ER = ER_issues_df2[(ER_issues_df2["labels.name"].str.contains("role") | ER_issues_df2["labels.name"].isin(complexity_labels) | 
                           ER_issues_df2["labels.name"].isin(extra_breakdown))]
-
-
-# In[52]:
-
 
 # Make combined label for issues with front and backend labels
 ER_wdataset = final_ER[final_ER["labels.name"].str.contains("front end") | final_ER["labels.name"].str.contains("back end")]
@@ -474,36 +439,21 @@ ER_wdataset["front/back end count"] = ER_wdataset.groupby(["html_url", "title"])
 
 final_ER.loc[list(ER_wdataset[ER_wdataset["front/back end count"] == 2].index), "labels.name"] = "role: front end and backend/DevOps"
 
-
-# In[53]:
-
-
 final_ER.drop_duplicates(inplace = True)
-
-
-# In[54]:
-
 
 final_ER2 = final_ER[["Runtime", "labels.name", "html_url", "title"]]
 
-# ### Get Issue Links in New Issue Approval Column and Get Issue Data
 
-# In[56]:
+# In[19]:
 
+
+### Get Issue Links in New Issue Approval Column and Get Issue Data
 
 # Retain only issue cards (take out description cards)
 
 newissue_approval = newissue_approval[~newissue_approval["content_url"].isna()]
 
-
-# In[58]:
-
-
 NIA_issues = list(newissue_approval['content_url'])
-
-
-# In[59]:
-
 
 NIA_issues_df = pd.DataFrame()
 
@@ -520,9 +470,6 @@ except ValueError:
         NIA_issues_df = pd.concat([NIA_issues_df, issue_data], ignore_index = True)
 
 
-# In[60]:
-
-
 # Get the timezone object for New York
 tz_LA = pytz.timezone('US/Pacific') 
 
@@ -533,10 +480,6 @@ datetime_LA = datetime.now(tz_LA)
 print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
 
 NIA_issues_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
-
-
-# In[61]:
-
 
 # Drop unneeded columns
 NIA_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comments_url', 'events_url', 'id',
@@ -567,56 +510,38 @@ NIA_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comments_u
  'closed_by.starred_url', 'closed_by.subscriptions_url', 'closed_by.organizations_url', 'closed_by.repos_url',
  'closed_by.events_url', 'closed_by.received_events_url', 'closed_by.type', 'closed_by.site_admin'], inplace = True)
 
-
-# In[63]:
-
-
 flatten_NIA = NIA_issues_df.to_json(orient = "records")
 parsed_NIA = json.loads(flatten_NIA)
 NIA_issues_df2 = pd.json_normalize(parsed_NIA, record_path = ["labels"], record_prefix = "labels.", meta = ["Runtime", "html_url", "title"])
 
 
-# In[64]:
-
-
 NIA_issues_df2.drop(columns = ['labels.id', 'labels.node_id', 'labels.url', 'labels.description',
        'labels.color', 'labels.default'], inplace = True)
 
-
-# In[65]:
-
-
+# Remove issues with ignore labels in NIA column
 if len([label for label in NIA_issues_df2["labels.name"].unique() if re.search('ignore', label.lower())])>0:
     remove = list(NIA_issues_df2[NIA_issues_df2["labels.name"].str.contains("gnore")]["html_url"])
     NIA_issues_df2 = NIA_issues_df2[~NIA_issues_df2["html_url"].isin(remove)]
 else:
     remove = []
-
-
-
-# In[67]:
-
-
+    
+# Finishing touches for ER dataset (include issues with no labels)
 NIA_difference = list(set(NIA_issues_df["html_url"]).difference(set(NIA_issues_df2["html_url"])))
 NIA_no_labels = list(set(NIA_difference).difference(set(remove)))
 NIA_no_labels_df = NIA_issues_df[NIA_issues_df["html_url"].isin(NIA_no_labels)][["Runtime", "html_url", "title"]]
 NIA_no_labels_df["labels.name"] = ""
 NIA_no_labels_df = NIA_no_labels_df.iloc[:, [3,0,1,2]]
-NIA_issues_df3 = NIA_issues_df2.append(ER_no_labels_df)
+
+# CHANGES MADE HERE!!!!!
+NIA_issues_df3 = pd.concat([NIA_issues_df2, NIA_no_labels_df], ignore_index = True)
+#############################################################################################
+
 NIA_issues_df3["Project Board Column"] = "3 - New Issue Approval"
 len(NIA_issues_df3)
-
-
-# In[72]:
-
 
 # retain only labels with "role" in it or complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 final_NIA = NIA_issues_df2[(NIA_issues_df2["labels.name"].str.contains("role") | NIA_issues_df2["labels.name"].isin(complexity_labels) | 
                           NIA_issues_df2["labels.name"].isin(extra_breakdown))]
-
-
-# In[73]:
-
 
 # Make combined label for issues with front and backend labels
 NIA_wdataset = final_NIA[final_NIA["labels.name"].str.contains("front end") | final_NIA["labels.name"].str.contains("back end")]
@@ -624,49 +549,21 @@ NIA_wdataset["front/back end count"] = NIA_wdataset.groupby(["html_url", "title"
 
 final_NIA.loc[list(NIA_wdataset[NIA_wdataset["front/back end count"] == 2].index), "labels.name"] = "role: front end and backend/DevOps"
 
-
-# In[74]:
-
-
 final_NIA.drop_duplicates(inplace = True)
-
-
-# In[75]:
-
 
 final_NIA2 = final_NIA[["Runtime", "labels.name", "html_url", "title"]]
 
 
-# In[76]:
+# In[20]:
 
 
-len(final_NIA2["html_url"].unique())
-
-
-# ### Get Issue Links in Prioritized Backlog Column and Get Issue Data
-
-# In[77]:
-
+### Get Issue Links in Prioritized Backlog Column and Get Issue Data
 
 # Retain only issue cards (take out description cards)
 
 prioritized_backlog = prioritized_backlog[~prioritized_backlog["content_url"].isna()]
 
-
-# In[78]:
-
-
-len(prioritized_backlog)
-
-
-# In[79]:
-
-
 pb_issues = list(prioritized_backlog["content_url"])
-
-
-# In[80]:
-
 
 pb_issues_df = pd.DataFrame()
 
@@ -681,11 +578,7 @@ except ValueError:
         response = requests.get(url, auth=(user, GitHub_token))
         issue_data = pd.json_normalize(response.json())
         pb_issues_df = pd.concat([pb_issues_df, issue_data], ignore_index = True)
-
-
-# In[81]:
-
-
+        
 # Get the timezone object for New York
 tz_LA = pytz.timezone('US/Pacific') 
 
@@ -696,10 +589,6 @@ datetime_LA = datetime.now(tz_LA)
 print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
 
 pb_issues_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
-
-
-# In[82]:
-
 
 # Drop unneeded columns
 pb_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comments_url', 'events_url', 'id',
@@ -725,60 +614,41 @@ pb_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comments_ur
  'closed_by.starred_url', 'closed_by.subscriptions_url', 'closed_by.organizations_url', 'closed_by.repos_url',
  'closed_by.events_url', 'closed_by.received_events_url', 'closed_by.type', 'closed_by.site_admin'], inplace = True)
 
-
-# In[83]:
-
-
 # Expand labels column (flatten)
 
 flatten_pb = pb_issues_df.to_json(orient = "records")
 parsed_pb = json.loads(flatten_pb)
 pb_issues_df2 = pd.json_normalize(parsed_pb, record_path = ['labels'], record_prefix = 'labels.', meta = ["Runtime", "html_url", "title"])
 
-
-# In[84]:
-
-
 # Drop unneeded columns
 
 pb_issues_df2.drop(columns = ['labels.id', 'labels.node_id', 'labels.url', 'labels.description',
        'labels.color', 'labels.default'], inplace = True)
 
-
-# In[85]:
-
-
+# Remove issues with ignore labels in Prioritized Backlog column
 if len([label for label in pb_issues_df2["labels.name"].unique() if re.search('ignore', label.lower())])>0:
     remove = list(pb_issues_df2[pb_issues_df2["labels.name"].str.contains("gnore")]["html_url"])
     pb_issues_df2 = pb_issues_df2[~pb_issues_df2["html_url"].isin(remove)]
 else:
     remove = []
-
-
-# In[86]:
-
-
+    
+# Finishing touches for Prioritized Backlog dataset (include issues with no labels)
 pb_difference = list(set(pb_issues_df["html_url"]).difference(set(pb_issues_df2["html_url"])))
 pb_no_labels = list(set(pb_difference).difference(set(remove)))
 pb_no_labels_df = pb_issues_df[pb_issues_df["html_url"].isin(pb_no_labels)][["Runtime", "html_url", "title"]]
 pb_no_labels_df["labels.name"] = ""
 pb_no_labels_df = pb_no_labels_df.iloc[:, [3,0,1,2]]
-pb_issues_df3 = pb_issues_df2.append(pb_no_labels_df)
+
+# CHANGES MADE HERE!!!!!
+pb_issues_df3 = pd.concat([pb_issues_df2, pb_no_labels_df], ignore_index = False)
+##############################################################################################################
+
 pb_issues_df3["Project Board Column"] = "4 - Prioritized Backlog"
-len(pb_issues_df3)
-
-
-# In[91]:
-
 
 # retain only labels with "role" in it, complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 
 final_pb = pb_issues_df2[(pb_issues_df2["labels.name"].str.contains("role") | pb_issues_df2["labels.name"].isin(complexity_labels) | 
                           pb_issues_df2["labels.name"].isin(extra_breakdown))]
-
-
-# In[93]:
-
 
 # Make combined label for issues with front and backend labels
 pb_wdataset = final_pb[final_pb["labels.name"].str.contains("front end") | final_pb["labels.name"].str.contains("back end")]
@@ -786,28 +656,17 @@ pb_wdataset["front/back end count"] = pb_wdataset.groupby(["html_url", "title"])
 
 final_pb.loc[list(pb_wdataset[pb_wdataset["front/back end count"] == 2].index), "labels.name"] = "role: front end and backend/DevOps"
 
-
-# In[94]:
-
-
 final_pb.drop_duplicates(inplace = True)
-
-
-# In[95]:
-
 
 final_pb2 = final_pb[["Runtime","labels.name", "html_url", "title"]]
 
 
-# ### Get Issue Links in "In Progress Column" and Get Issue Data
-
-# In[97]:
+# In[21]:
 
 
-in_progress_issues = list(in_progress[~in_progress['content_url'].isna()]['content_url'])  
+### Get Issue Links in "In Progress Column" and Get Issue Data
 
-# In[98]:
-
+in_progress_issues = list(in_progress[~in_progress['content_url'].isna()]['content_url']) 
 
 ip_df = pd.DataFrame()
 
@@ -822,11 +681,7 @@ except ValueError:
         response = requests.get(url, auth=(user, GitHub_token))
         issue_data = pd.json_normalize(response.json())
         ip_df = pd.concat([ip_df, issue_data], ignore_index = True)
-
-
-# In[99]:
-
-
+        
 # Get the timezone object for New York
 tz_LA = pytz.timezone('US/Pacific') 
 
@@ -837,10 +692,6 @@ datetime_LA = datetime.now(tz_LA)
 print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
 
 ip_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
-
-
-# In[100]:
-
 
 # Drop unneeded columns
 ip_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comments_url', 'events_url', 'id',
@@ -871,55 +722,38 @@ ip_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comments_url', 'ev
  'closed_by.starred_url', 'closed_by.subscriptions_url', 'closed_by.organizations_url', 'closed_by.repos_url',
  'closed_by.events_url', 'closed_by.received_events_url', 'closed_by.type', 'closed_by.site_admin'], inplace = True)
 
-
-# In[101]:
-
-
 # Flatten labels column
 
 flatten_ip = ip_df.to_json(orient = "records")
 parsed_ip = json.loads(flatten_ip)
 ip_df2 = pd.json_normalize(parsed_ip, record_path = ["labels"], record_prefix = "labels.", meta = ["Runtime", "html_url", "title"])
 
-
-# In[102]:
-
-
 ip_df2.drop(columns = ['labels.id', 'labels.node_id', 'labels.url', 'labels.description',
        'labels.color', 'labels.default'], inplace = True)
 
-
-# In[103]:
-
-
+# Remove issues with ignore labels in In Progress column
 if len([label for label in ip_df2["labels.name"].unique() if re.search('ignore', label.lower())])>0:
     remove = list(ip_df2[ip_df2["labels.name"].str.contains("gnore")]["html_url"])
     ip_df2 = ip_df2[~ip_df2["html_url"].isin(remove)]
 else:
     remove = []
-
-
-# In[104]:
-
-
+    
+# Finishing touches for In Progress dataset (include issues with no labels)
 ip_difference = list(set(ip_df["html_url"]).difference(set(ip_df2["html_url"])))
 ip_no_labels = list(set(ip_difference).difference(set(remove)))
 ip_no_labels_df = ip_df[ip_df["html_url"].isin(ip_no_labels)][["Runtime", "html_url", "title"]]
 ip_no_labels_df["labels.name"] = ""
 ip_no_labels_df = ip_no_labels_df.iloc[:, [3,0,1,2]]
-ip_issues_df3 = ip_df2.append(ip_no_labels_df)
+
+# CHANGES MADE HERE!!!!!
+ip_issues_df3 = pd.concat([ip_df2, ip_no_labels_df], ignore_index = True)
+#############################################################################################
+
 ip_issues_df3["Project Board Column"] = "5 - In Progress"
-
-# In[109]:
-
 
 # retain only labels with "role" in it or complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 final_ip = ip_df2[(ip_df2["labels.name"].str.contains("role") | ip_df2["labels.name"].isin(complexity_labels) | 
                           ip_df2["labels.name"].isin(extra_breakdown))]
-
-
-# In[110]:
-
 
 # Make combined label for issues with front and backend labels
 ip_wdataset = final_ip[final_ip["labels.name"].str.contains("front end") | final_ip["labels.name"].str.contains("back end")]
@@ -927,34 +761,17 @@ ip_wdataset["front/back end count"] = ip_wdataset.groupby(["html_url", "title"])
 
 final_ip.loc[list(ip_wdataset[ip_wdataset["front/back end count"] == 2].index), "labels.name"] = "role: front end and backend/DevOps"
 
-
-# In[111]:
-
-
 final_ip.drop_duplicates(inplace = True)
-
-
-# In[112]:
-
 
 final_ip2 = final_ip[["Runtime", "labels.name", "html_url", "title"]]
 
 
-# In[113]:
+# In[22]:
 
 
-len(final_ip2["html_url"].unique())
-
-
-# ### Get Issue Links in "Questions/ In Review" and Get Issue Data
-
-# In[114]:
-
+### Get Issue Links in "Questions/ In Review" and Get Issue Data
 
 questions_issues = list(questions[~questions['content_url'].isna()]['content_url'])  
-
-# In[115]:
-
 
 questions_issues_df = pd.DataFrame()
 
@@ -969,11 +786,7 @@ except ValueError:
         response = requests.get(url, auth=(user, GitHub_token))
         issue_data = pd.json_normalize(response.json())
         questions_issues_df = pd.concat([questions_issues_df, issue_data], ignore_index = True)
-
-
-# In[116]:
-
-
+        
 # Get the timezone object for New York
 tz_LA = pytz.timezone('US/Pacific') 
 
@@ -984,10 +797,6 @@ datetime_LA = datetime.now(tz_LA)
 print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
 
 questions_issues_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
-
-
-# In[117]:
-
 
 # Drop unneeded columns
 questions_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comments_url', 'events_url', 'id',
@@ -1014,57 +823,38 @@ questions_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comm
  'assignee.repos_url', 'assignee.events_url', 'assignee.received_events_url', 'assignee.type',
  'assignee.site_admin'], inplace = True)
 
-
-# In[118]:
-
-
 # Flatten labels column
 
 flatten_questions = questions_issues_df.to_json(orient = "records")
 parsed_questions= json.loads(flatten_questions)
 questions_issues_df2 = pd.json_normalize(parsed_questions, record_path = ["labels"], record_prefix = "labels.", meta = ["Runtime", "html_url", "title"])
 
-
-# In[119]:
-
-
 questions_issues_df2.drop(columns = ['labels.id', 'labels.node_id', 'labels.url', 'labels.description',
        'labels.color', 'labels.default'], inplace = True)
 
-
-# In[120]:
-
-
+# Remove issues with ignore labels in Questions/In Review column
 if len([label for label in questions_issues_df2["labels.name"].unique() if re.search('ignore', label.lower())])>0:
     remove = list(questions_issues_df2[questions_issues_df2["labels.name"].str.contains("gnore")]["html_url"])
     questions_issues_df2 = questions_issues_df2[~questions_issues_df2["html_url"].isin(remove)]
 else:
     remove = []
 
-
-# In[121]:
-
-
+# Finishing touches for Questions/ In Review dataset (include issues with no labels)
 questions_difference = list(set(questions_issues_df["html_url"]).difference(set(questions_issues_df2["html_url"])))
 questions_no_labels = list(set(questions_difference).difference(set(remove)))
 questions_no_labels_df = questions_issues_df[questions_issues_df["html_url"].isin(questions_no_labels)][["Runtime", "html_url", "title"]]
 questions_no_labels_df["labels.name"] = ""
 questions_no_labels_df = questions_no_labels_df.iloc[:, [3,0,1,2]]
-questions_issues_df3 = questions_issues_df2.append(questions_no_labels_df)
+
+# CHANGES MADE HERE!!!!!
+questions_issues_df3 = pd.concat([questions_issues_df2, questions_no_labels_df], ignore_index = True)
+###################################################################################
+
 questions_issues_df3["Project Board Column"] = "6 - Questions/ In Review"
-len(questions_issues_df3)
-
-
-# In[125]:
-
 
 # retain only labels with "role" in it or complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
-final_questions = questions_issues_df2[(questions_issues_df2["labels.name"].str.contains("role") | questions_issues_df2["labels.name"].isin(complexity_labels) | 
-                          questions_issues_df2["labels.name"].isin(extra_breakdown))]
-
-
-# In[126]:
-
+final_questions = questions_issues_df2[(questions_issues_df2["labels.name"].str.contains("role") | questions_issues_df2["labels.name"].isin(complexity_labels) 
+                                        | questions_issues_df2["labels.name"].isin(extra_breakdown))]
 
 # Make combined label for issues with front and backend labels
 questions_wdataset = final_questions[final_questions["labels.name"].str.contains("front end") | final_questions["labels.name"].str.contains("back end")]
@@ -1072,29 +862,17 @@ questions_wdataset["front/back end count"] = questions_wdataset.groupby(["html_u
 
 final_questions.loc[list(questions_wdataset[questions_wdataset["front/back end count"] == 2].index), "labels.name"] = "role: front end and backend/DevOps"
 
-
-# In[127]:
-
-
 final_questions.drop_duplicates(inplace = True)
-
-
-# In[128]:
-
 
 final_questions2 = final_questions[["Runtime","labels.name", "html_url", "title"]]
 
 
-# ### Get Issue Links in QA Column and Get Issue Data
+# In[23]:
 
-# In[130]:
 
+### Get Issue Links in QA Column and Get Issue Data
 
 QA_issues = list(QA[~QA['content_url'].isna()]['content_url'])  
-
-
-# In[131]:
-
 
 QA_issues_df = pd.DataFrame()
 
@@ -1109,11 +887,7 @@ except ValueError:
         response = requests.get(url, auth=(user, GitHub_token))
         issue_data = pd.json_normalize(response.json())
         QA_issues_df = pd.concat([QA_issues_df, issue_data], ignore_index = True)
-
-
-# In[132]:
-
-
+        
 # Get the timezone object for New York
 tz_LA = pytz.timezone('US/Pacific') 
 
@@ -1124,10 +898,6 @@ datetime_LA = datetime.now(tz_LA)
 print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
 
 QA_issues_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
-
-
-# In[133]:
-
 
 # Drop unneeded columns
 QA_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comments_url', 'events_url', 'id',
@@ -1154,57 +924,38 @@ QA_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comments_ur
  'assignee.repos_url', 'assignee.events_url', 'assignee.received_events_url', 'assignee.type',
  'assignee.site_admin'], inplace = True)
 
-
-# In[134]:
-
-
 # Flatten labels column
 
 flatten_QA = QA_issues_df.to_json(orient = "records")
 parsed_QA = json.loads(flatten_QA)
 QA_issues_df2 = pd.json_normalize(parsed_QA, record_path = ["labels"], record_prefix = "labels.", meta = ["Runtime", "html_url", "title"])
 
-
-# In[135]:
-
-
 QA_issues_df2.drop(columns = ['labels.id', 'labels.node_id', 'labels.url', 'labels.description',
        'labels.color', 'labels.default'], inplace = True)
 
-
-# In[136]:
-
-
+# Remove issues with ignore labels in QA column
 if len([label for label in QA_issues_df2["labels.name"].unique() if re.search('ignore', label.lower())])>0:
     remove = list(QA_issues_df2[QA_issues_df2["labels.name"].str.contains("gnore")]["html_url"])
     QA_issues_df2 = QA_issues_df2[~QA_issues_df2["html_url"].isin(remove)]
 else:
     remove = []
 
-
-# In[137]:
-
-
+# Finishing touches for QA dataset (include issues with no labels)
 QA_difference = list(set(QA_issues_df["html_url"]).difference(set(QA_issues_df2["html_url"])))
 QA_no_labels = list(set(QA_difference).difference(set(remove)))
 QA_no_labels_df = QA_issues_df[QA_issues_df["html_url"].isin(QA_no_labels)][["Runtime", "html_url", "title"]]
 QA_no_labels_df["labels.name"] = ""
 QA_no_labels_df = QA_no_labels_df.iloc[:, [3,0,1,2]]
-QA_issues_df3 = QA_issues_df2.append(QA_no_labels_df)
+
+# CHANGES MADE HERE!!!!!
+QA_issues_df3 = pd.concat([QA_issues_df2, QA_no_labels_df], ignore_index = True)
+##############################################################################################################
+
 QA_issues_df3["Project Board Column"] = "7 - QA"
-len(QA_issues_df3)
-
-
-# In[142]:
-
 
 # retain only labels with "role" in it or complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 final_QA = QA_issues_df2[(QA_issues_df2["labels.name"].str.contains("role") | QA_issues_df2["labels.name"].isin(complexity_labels) | 
                           QA_issues_df2["labels.name"].isin(extra_breakdown))]
-
-
-# In[143]:
-
 
 # Make combined label for issues with front and backend labels
 QA_wdataset = final_QA[final_QA["labels.name"].str.contains("front end") | final_QA["labels.name"].str.contains("back end")]
@@ -1212,28 +963,17 @@ QA_wdataset["front/back end count"] = QA_wdataset.groupby(["html_url", "title"])
 
 final_QA.loc[list(QA_wdataset[QA_wdataset["front/back end count"] == 2].index), "labels.name"] = "role: front end and backend/DevOps"
 
-
-# In[144]:
-
-
 final_QA.drop_duplicates(inplace = True)
-
-
-# In[145]:
-
 
 final_QA2 = final_QA[["Runtime", "labels.name", "html_url", "title"]]
 
 
-# ### Get Issue Links in UAT Column and Get Issue Data
-
-# In[147]:
+# In[24]:
 
 
-UAT_issues = list(UAT[~UAT['content_url'].isna()]['content_url'])  
+### Get Issue Links in UAT Column and Get Issue Data
 
-# In[148]:
-
+UAT_issues = list(UAT[~UAT['content_url'].isna()]['content_url'])
 
 UAT_issues_df = pd.DataFrame()
 
@@ -1248,11 +988,7 @@ except ValueError:
         response = requests.get(url, auth=(user, GitHub_token))
         issue_data = pd.json_normalize(response.json())
         UAT_issues_df = pd.concat([UAT_issues_df, issue_data], ignore_index = True)
-
-
-# In[149]:
-
-
+        
 # Get the timezone object for New York
 tz_LA = pytz.timezone('US/Pacific') 
 
@@ -1262,11 +998,7 @@ datetime_LA = datetime.now(tz_LA)
 # Format the time as a string and print it
 print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
 
-UAT_issues_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
-
-
-# In[150]:
-
+UAT_issues_df["Runtime"] = "LA time: "+ datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
 
 # Drop unneeded columns
 UAT_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comments_url', 'events_url', 'id',
@@ -1293,57 +1025,38 @@ UAT_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comments_u
  'assignee.repos_url', 'assignee.events_url', 'assignee.received_events_url', 'assignee.type',
  'assignee.site_admin'], inplace = True)
 
-
-# In[151]:
-
-
 # Flatten labels column
 
 flatten_UAT = UAT_issues_df.to_json(orient = "records")
 parsed_UAT= json.loads(flatten_UAT)
 UAT_issues_df2 = pd.json_normalize(parsed_UAT, record_path = ["labels"], record_prefix = "labels.", meta = ["Runtime", "html_url", "title"])
 
-
-# In[152]:
-
-
 UAT_issues_df2.drop(columns = ['labels.id', 'labels.node_id', 'labels.url', 'labels.description',
        'labels.color', 'labels.default'], inplace = True)
 
-
-# In[153]:
-
-
+# Remove issues with ignore labels in UAT column
 if len([label for label in UAT_issues_df2["labels.name"].unique() if re.search('ignore', label.lower())])>0:
     remove = list(UAT_issues_df2[UAT_issues_df2["labels.name"].str.contains("gnore")]["html_url"])
     UAT_issues_df2 = UAT_issues_df2[~UAT_issues_df2["html_url"].isin(remove)]
 else:
     remove = []
 
-
-# In[154]:
-
-
+# Finishing touches for UAT dataset (include issues with no labels)
 UAT_difference = list(set(UAT_issues_df["html_url"]).difference(set(UAT_issues_df2["html_url"])))
 UAT_no_labels = list(set(UAT_difference).difference(set(remove)))
 UAT_no_labels_df = UAT_issues_df[UAT_issues_df["html_url"].isin(UAT_no_labels)][["Runtime", "html_url", "title"]]
 UAT_no_labels_df["labels.name"] = ""
 UAT_no_labels_df = UAT_no_labels_df.iloc[:, [3,0,1,2]]
-UAT_issues_df3 = UAT_issues_df2.append(UAT_no_labels_df)
+
+# CHANGES MADE HERE!!!!!
+UAT_issues_df3 = pd.concat([UAT_issues_df2, UAT_no_labels_df], ignore_index = True)
+###############################################################################################################
+
 UAT_issues_df3["Project Board Column"] = "8 - UAT"
-len(UAT_issues_df3)
-
-
-# In[159]:
-
 
 # retain only labels with "role" in it or complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 final_UAT = UAT_issues_df2[(UAT_issues_df2["labels.name"].str.contains("role") | UAT_issues_df2["labels.name"].isin(complexity_labels) | 
                           UAT_issues_df2["labels.name"].isin(extra_breakdown))]
-
-
-# In[160]:
-
 
 # Make combined label for issues with front and backend labels
 UAT_wdataset = final_UAT[final_UAT["labels.name"].str.contains("front end") | final_UAT["labels.name"].str.contains("back end")]
@@ -1351,29 +1064,17 @@ UAT_wdataset["front/back end count"] = UAT_wdataset.groupby(["html_url", "title"
 
 final_UAT.loc[list(UAT_wdataset[UAT_wdataset["front/back end count"] == 2].index), "labels.name"] = "role: front end and backend/DevOps"
 
-
-# In[161]:
-
-
 final_UAT.drop_duplicates(inplace = True)
-
-
-# In[162]:
-
 
 final_UAT2 = final_UAT[["Runtime", "labels.name", "html_url", "title"]]
 
-# ### Get Issue Links in "QA - senior review" Column and Get Issue Data
 
-# In[164]:
+# In[25]:
 
+
+### Get Issue Links in "QA - senior review" Column and Get Issue Data
 
 QA_review_issues = list(QA_review[~QA_review['content_url'].isna()]['content_url'])  
-len(QA_review_issues)
-
-
-# In[165]:
-
 
 QA_review_issues_df = pd.DataFrame()
 
@@ -1388,11 +1089,7 @@ except ValueError:
         response = requests.get(url, auth=(user, GitHub_token))
         issue_data = pd.json_normalize(response.json())
         QA_review_issues_df = pd.concat([QA_review_issues_df, issue_data], ignore_index = True)
-
-
-# In[166]:
-
-
+        
 # Get the timezone object for New York
 tz_LA = pytz.timezone('US/Pacific') 
 
@@ -1403,10 +1100,6 @@ datetime_LA = datetime.now(tz_LA)
 print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
 
 QA_review_issues_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
-
-
-# In[167]:
-
 
 # Drop unneeded columns
 QA_review_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comments_url', 'events_url', 'id',
@@ -1433,55 +1126,38 @@ QA_review_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comm
  'assignee.repos_url', 'assignee.events_url', 'assignee.received_events_url', 'assignee.type',
  'assignee.site_admin'], inplace = True)
 
-
-# In[168]:
-
-
 # Flatten labels column
 
 flatten_QA_review = QA_review_issues_df.to_json(orient = "records")
 parsed_QA_review= json.loads(flatten_QA_review)
 QA_review_issues_df2 = pd.json_normalize(parsed_QA_review, record_path = ["labels"], record_prefix = "labels.", meta = ["Runtime", "html_url", "title"])
 
-
-# In[169]:
-
-
 QA_review_issues_df2.drop(columns = ['labels.id', 'labels.node_id', 'labels.url', 'labels.description',
        'labels.color', 'labels.default'], inplace = True)
 
-
-# In[170]:
-
-
+# Remove issues with ignore labels in QA Senior Review column
 if len([label for label in QA_review_issues_df2["labels.name"].unique() if re.search('ignore', label.lower())])>0:
     remove = list(QA_review_issues_df2[QA_review_issues_df2["labels.name"].str.contains("gnore")]["html_url"])
     QA_review_issues_df2 = QA_review_issues_df2[~QA_review_issues_df2["html_url"].isin(remove)]
 else: 
     remove = []
-
-
-# In[171]:
-
-
+    
+# Finishing touches for QA Senior Review dataset (include issues with no labels)
 QA_review_difference = list(set(QA_review_issues_df["html_url"]).difference(set(QA_review_issues_df2["html_url"])))
 QA_review_no_labels = list(set(QA_review_difference).difference(set(remove)))
 QA_review_no_labels_df = QA_review_issues_df[QA_review_issues_df["html_url"].isin(QA_review_no_labels)][["Runtime", "html_url", "title"]]
 QA_review_no_labels_df["labels.name"] = ""
 QA_review_no_labels_df = QA_review_no_labels_df.iloc[:, [3,0,1,2]]
-QA_review_issues_df3 = QA_review_issues_df2.append(QA_review_no_labels_df)
+
+# CHANGES MADE HERE!!!!!
+QA_review_issues_df3 = pd.concat([QA_review_issues_df2, QA_review_no_labels_df], ignore_index = True)
+#########################################################################################################################################
+
 QA_review_issues_df3["Project Board Column"] = "9 - QA (senior review)"
-
-# In[178]:
-
 
 # retain only labels with "role" in it or complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 final_QA_review = QA_review_issues_df2[(QA_review_issues_df2["labels.name"].str.contains("role") | QA_review_issues_df2["labels.name"].isin(complexity_labels) | 
-                          QA_review_issues_df2["labels.name"].isin(extra_breakdown))]
-
-
-# In[179]:
-
+                                        QA_review_issues_df2["labels.name"].isin(extra_breakdown))]
 
 # Make combined label for issues with front and backend labels
 QA_review_wdataset = final_QA_review[final_QA_review["labels.name"].str.contains("front end") | final_QA_review["labels.name"].str.contains("back end")]
@@ -1489,51 +1165,25 @@ QA_review_wdataset["front/back end count"] = QA_review_wdataset.groupby(["html_u
 
 final_QA_review.loc[list(QA_review_wdataset[QA_review_wdataset["front/back end count"] == 2].index), "labels.name"] = "role: front end and backend/DevOps"
 
-
-# In[180]:
-
-
 final_QA_review.drop_duplicates(inplace = True)
-
-
-# In[181]:
-
 
 final_QA_review2 = final_QA_review[["Runtime", "labels.name", "html_url", "title"]]
 
 
 # ### Create Data Source for Dashboard
 
-# #### Main Issue Availability Dashboard with Breakdown
-
-# Icebox
-
-# In[183]:
+# In[26]:
 
 
 icebox_role = final_icebox2[final_icebox2["labels.name"].str.contains("role")]
 icebox_complexity = final_icebox2[final_icebox2["labels.name"].isin(complexity_labels)]
 
-
-# In[184]:
-
-
-# Join the datasets for data source
-
 icebox_dataset = icebox_role.merge(icebox_complexity, how = "outer", on = ["html_url", "title"])
 icebox_dataset.rename(columns = {"labels.name_x": "Role Label", "labels.name_y": "Complexity Label", "Runtime_x":"Runtime"}, inplace = True)
-
-
-# In[185]:
-
-
+        
 icebox_runtime_nulls_loc = icebox_dataset[icebox_dataset["Runtime"].isna()].index
 icebox_dataset.loc[icebox_runtime_nulls_loc, "Runtime"]= icebox_dataset[~icebox_dataset["Runtime"].isna()].iloc[0,0]
 icebox_dataset.drop(columns = ["Runtime_y"], inplace = True)
-
-
-# In[186]:
-
 
 for label in extra_breakdown:
     if len(final_icebox2[final_icebox2["labels.name"]==label]) > 0:
@@ -1543,51 +1193,200 @@ for label in extra_breakdown:
         icebox_dataset.rename(columns = {"labels.name": label}, inplace = True)
     elif len(final_icebox2[final_icebox2["labels.name"]==label]) == 0:
         icebox_dataset[label] = 0
-
-
-# In[187]:
-
-
+        
 icebox_dataset["Project Board Column"] = "1 - Icebox"
 
-
-# In[190]:
-
-
-# reoder the columns
 icebox_dataset2 = icebox_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
-icebox_dataset2
-0, 1, 2, 
+
+
+# In[27]:
+
+
+icebox_issueswithstatus = final_icebox2[final_icebox2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
+icebox_dataset2["Unknown Status 1"] = icebox_dataset2["html_url"].map(lambda x: 0 if x in icebox_issueswithstatus else 1) # issues that do not have label in extra_breakdown
+
+
+# In[28]:
+
+
+# Add in static link for Unknown Status 1
+
+complexity_link = {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22good+first+issue%22",
+                   "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+small%22", 
+                   "Complexity: Medium":"https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+medium%22",
+                   "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+large%22",
+                   "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+extra+large%22",
+                   "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+missing%22",
+                   "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+prework%22",
+                   "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+see+issue+making+label%22",
+                  "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22prework%22",
+                  "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+good+second+issue%22"}
+
+
+# In[29]:
+
+
+icebox_dataset2["General Link for Unknown Status 1"] = icebox_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+
+
+# In[30]:
+
+
+nesteddict_unknownstatus1 = {"role: front end": {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22good+first+issue%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                 "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+small%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                 "Complexity: Medium": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+medium%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                 "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+large%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                 "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+extra+large%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                 "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+missing%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                 "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+prework%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                 "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+see+issue+making+label%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22prework%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+good+second+issue%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22"},
+                             "role: back end/devOps": {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22good+first+issue%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                       "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+small%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                       "Complexity: Medium": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+medium%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                       "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+large%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                       "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+extra+large%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                       "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+missing%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                       "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+prework%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                       "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+see+issue+making+label%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                      "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22prework%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                      "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+good+second+issue%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22"},
+                             "role: front end and backend/DevOps": {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22good+first+issue%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                    "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+small%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                    "Complexity: Medium": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+medium%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                    "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+large%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                    "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+extra+large%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                    "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+missing%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                    "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+prework%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                    "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+see+issue+making+label%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                   "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22prework%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                   "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+good+second+issue%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22"},
+                             "role: dev leads": {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22good+first+issue%22+label%3A%22role%3A+dev+leads%22",
+                                                 "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+small%22+label%3A%22role%3A+dev+leads%22",
+                                                 "Complexity: Medium": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+medium%22+label%3A%22role%3A+dev+leads%22",
+                                                 "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+large%22+label%3A%22role%3A+dev+leads%22",
+                                                 "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+extra+large%22+label%3A%22role%3A+dev+leads%22",
+                                                 "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+missing%22+label%3A%22role%3A+dev+leads%22",
+                                                 "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+prework%22+label%3A%22role%3A+dev+leads%22",
+                                                 "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+see+issue+making+label%22+label%3A%22role%3A+dev+leads%22",
+                                                "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22prework%22+label%3A%22role%3A+dev+leads%22",
+                                                "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+good+second+issue%22+label%3A%22role%3A+dev+leads%22"}
+                            }               
+
+
+# In[31]:
+
+
+icebox_dataset2["Role-based Link for Unknown Status 1"] = ""
+for role in nesteddict_unknownstatus1.keys():
+    df = icebox_dataset2[icebox_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        icebox_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
+
+
+# In[32]:
+
+
+icebox_issues_withstatus_B = final_icebox2[final_icebox2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
+icebox_dataset2["Unknown Status 2"] = icebox_dataset2["html_url"].map(lambda x: 0 if x in icebox_issues_withstatus_B else 1)
+
+
+# In[33]:
+
+
+complexity_link_B = {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22good+first+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22",
+                   "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+small%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22", 
+                   "Complexity: Medium":"https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+medium%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22",
+                   "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22",
+                   "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+extra+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22",
+                   "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+missing%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22",
+                   "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22",
+                   "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+see+issue+making+label%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22",
+                    "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22",
+                    "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+good+second+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22"}
+
+
+# In[34]:
+
+
+icebox_dataset2["General Link for Unknown Status 2"] = icebox_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
+
+
+# In[36]:
+
+
+nesteddict_unknownstatus2 = {"role: front end": {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22good+first+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                 "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+small%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                 "Complexity: Medium": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+medium%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                 "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                 "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+extra+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                 "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+missing%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                 "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                 "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+see+issue+making+label%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
+                                                "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+good+second+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22"},
+                             "role: back end/devOps": {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22good+first+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                       "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+small%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                       "Complexity: Medium": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+medium%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                       "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                       "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+extra+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                       "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+missing%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                       "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                       "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+see+issue+making+label%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                      "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                      "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+good+second+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22"},
+                             "role: front end and backend/DevOps": {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22good+first+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                    "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+small%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                    "Complexity: Medium": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+medium%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                    "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                    "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+extra+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                    "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+missing%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                    "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                    "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                   "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22good+first+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
+                                                                   "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+good+second+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22"},
+                             "role: dev leads": {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22good+first+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
+                                                 "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+small%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
+                                                 "Complexity: Medium": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+medium%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
+                                                 "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
+                                                 "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+extra+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
+                                                 "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+missing%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
+                                                 "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
+                                                 "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+see+issue+making+label%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
+                                                "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
+                                                "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+good+second+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22"}
+                            }               
+
+
+# In[37]:
+
+
+icebox_dataset2["Role-based Link for Unknown Status 2"] = ""
+for role in nesteddict_unknownstatus2.keys():
+    df = icebox_dataset2[icebox_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        icebox_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
+
+
+# In[38]:
 
 
 # Emergent Request
 
-# In[191]:
-
-
 ER_role = final_ER2[final_ER2["labels.name"].str.contains("role")]
 ER_complexity = final_ER2[final_ER2["labels.name"].isin(complexity_labels)]
-
-
-# In[192]:
-
-
-# Join the datasets for data source
 
 ER_dataset = ER_role.merge(ER_complexity, how = "outer", on = ["html_url", "title"])
 ER_dataset.rename(columns = {"labels.name_x": "Role Label", "labels.name_y": "Complexity Label", "Runtime_x":"Runtime"}, inplace = True)
 
-
-# In[193]:
-
-
 ER_runtime_nulls_loc = ER_dataset[ER_dataset["Runtime"].isna()].index
 ER_dataset.loc[ER_runtime_nulls_loc, "Runtime"]= ER_dataset[~ER_dataset["Runtime"].isna()].iloc[0,0]
 ER_dataset.drop(columns = ["Runtime_y"], inplace = True)
-
-
-# In[194]:
-
 
 for label in extra_breakdown:
     if len(final_ER2[final_ER2["labels.name"]==label]) > 0:
@@ -1597,45 +1396,54 @@ for label in extra_breakdown:
         ER_dataset.rename(columns = {"labels.name": label}, inplace = True)
     elif len(final_ER2[final_ER2["labels.name"]==label]) == 0:
         ER_dataset[label] = 0
-
-
-# In[195]:
-
-
+        
 ER_dataset["Project Board Column"] = "2 - ER"
-
-# In[197]:
 
 # reoder the columns
 ER_dataset2 = ER_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
 
+ER_issueswithstatus = final_ER2[final_ER2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
+ER_dataset2["Unknown Status 1"] = ER_dataset2["html_url"].map(lambda x: 0 if x in ER_issueswithstatus else 1) # issues that do not have label in extra_breakdown
+
+ER_dataset2["General Link for Unknown Status 1"] = ER_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+
+ER_dataset2["Role-based Link for Unknown Status 1"] = ""
+for role in nesteddict_unknownstatus1.keys():
+    df = ER_dataset2[ER_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        ER_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
+        
+ER_issues_withstatus_B = final_ER2[final_ER2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
+ER_dataset2["Unknown Status 2"] = ER_dataset2["html_url"].map(lambda x: 0 if x in ER_issues_withstatus_B else 1)
+
+ER_dataset2["General Link for Unknown Status 2"] = ER_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
+
+ER_dataset2["Role-based Link for Unknown Status 2"] = ""
+for role in nesteddict_unknownstatus2.keys():
+    df = ER_dataset2[ER_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        ER_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
+
+
+# In[39]:
+
+
 # New Issue Approval
-
-# In[198]:
-
-
+    
 NIA_role = final_NIA2[final_NIA2["labels.name"].str.contains("role")]
 NIA_complexity = final_NIA2[final_NIA2["labels.name"].isin(complexity_labels)]
-
-
-# In[199]:
-
 
 # Join the datasets for data source
 NIA_dataset = NIA_role.merge(NIA_complexity, how = "outer", on = ["html_url", "title"])
 NIA_dataset.rename(columns = {"labels.name_x": "Role Label", "labels.name_y": "Complexity Label", "Runtime_x":"Runtime"}, inplace = True)
 
-
-# In[200]:
-
-
 NIA_runtime_nulls_loc = NIA_dataset[NIA_dataset["Runtime"].isna()].index
 NIA_dataset.loc[NIA_runtime_nulls_loc, "Runtime"]= NIA_dataset[~NIA_dataset["Runtime"].isna()].iloc[0,0]
 NIA_dataset.drop(columns = ["Runtime_y"], inplace = True)
-
-
-# In[201]:
-
 
 for label in extra_breakdown:
     if len(final_NIA2[final_NIA2["labels.name"]==label]) > 0:
@@ -1646,52 +1454,53 @@ for label in extra_breakdown:
     elif len(final_NIA2[final_NIA2["labels.name"]==label]) == 0:
         NIA_dataset[label] = 0
 
-
-# In[202]:
-
-
 NIA_dataset["Project Board Column"] = "3 - New Issue Approval"
 
-
-# In[204]:
-
-
-# reoder the columns
 NIA_dataset2 = NIA_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
-NIA_dataset2
+
+# Add in unknown status columns
+
+NIA_issueswithstatus = final_NIA2[final_NIA2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
+NIA_dataset2["Unknown Status 1"] = NIA_dataset2["html_url"].map(lambda x: 0 if x in NIA_issueswithstatus else 1) # issues that do not have label in extra_breakdown
+
+NIA_dataset2["General Link for Unknown Status 1"] = NIA_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+
+NIA_dataset2["Role-based Link for Unknown Status 1"] = ""
+for role in nesteddict_unknownstatus1.keys():
+    df = NIA_dataset2[NIA_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        NIA_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
+        
+NIA_issues_withstatus_B = final_NIA2[final_NIA2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
+NIA_dataset2["Unknown Status 2"] = NIA_dataset2["html_url"].map(lambda x: 0 if x in NIA_issues_withstatus_B else 1)
+
+NIA_dataset2["General Link for Unknown Status 2"] = NIA_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
+
+NIA_dataset2["Role-based Link for Unknown Status 2"] = ""
+for role in nesteddict_unknownstatus2.keys():
+    df = NIA_dataset2[NIA_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        NIA_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
+
+
+# In[40]:
 
 
 # Prioritized Backlog
 
-# In[205]:
-
-
-# How to collapse role and complexity into one row...
-
-# Can create two separate datasets from current dataset and join them by title and html_url
 pb_role = final_pb2[final_pb2["labels.name"].str.contains("role")]
 pb_complexity = final_pb2[final_pb2["labels.name"].isin(complexity_labels)]
-
-
-# In[206]:
-
-
-# Join the datasets for data source
 
 pb_dataset = pb_role.merge(pb_complexity, how = "outer", on = ["html_url", "title"])
 pb_dataset.rename(columns = {"labels.name_x": "Role Label", "labels.name_y": "Complexity Label", "Runtime_x":"Runtime"}, inplace = True)
 
-
-# In[207]:
-
-
 pb_runtime_nulls_loc = pb_dataset[pb_dataset["Runtime"].isna()].index
 pb_dataset.loc[pb_runtime_nulls_loc, "Runtime"]= pb_dataset[~pb_dataset["Runtime"].isna()].iloc[0,0]
 pb_dataset.drop(columns = ["Runtime_y"], inplace = True)
-
-
-# In[208]:
-
 
 for label in extra_breakdown:
     if len(final_pb2[final_pb2["labels.name"]==label]) > 0:
@@ -1701,50 +1510,54 @@ for label in extra_breakdown:
         pb_dataset.rename(columns = {"labels.name": label}, inplace = True)
     elif len(final_pb2[final_pb2["labels.name"]==label]) == 0:
         pb_dataset[label] = 0
-
-
-# In[209]:
-
-
+        
 pb_dataset["Project Board Column"] = "4 - Prioritized Backlog"
 
-
-# In[211]:
-
-
-# reoder the columns
 pb_dataset2 = pb_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
-pb_dataset2
+
+# Add in unknown status columns
+
+pb_issueswithstatus = final_pb2[final_pb2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
+pb_dataset2["Unknown Status 1"] = pb_dataset2["html_url"].map(lambda x: 0 if x in pb_issueswithstatus else 1) # issues that do not have label in extra_breakdown
+
+pb_dataset2["General Link for Unknown Status 1"] = pb_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+
+pb_dataset2["Role-based Link for Unknown Status 1"] = ""
+for role in nesteddict_unknownstatus1.keys():
+    df = pb_dataset2[pb_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        pb_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
+        
+pb_issues_withstatus_B = final_pb2[final_pb2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
+pb_dataset2["Unknown Status 2"] = pb_dataset2["html_url"].map(lambda x: 0 if x in pb_issues_withstatus_B else 1)
+
+pb_dataset2["General Link for Unknown Status 2"] = pb_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
+
+pb_dataset2["Role-based Link for Unknown Status 2"] = ""
+for role in nesteddict_unknownstatus2.keys():
+    df = pb_dataset2[pb_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        pb_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
+
+
+# In[41]:
 
 
 # In Progress (actively working)
 
-# In[212]:
-
-
 IP_role = final_ip2[final_ip2["labels.name"].str.contains("role")]
 IP_complexity = final_ip2[final_ip2["labels.name"].isin(complexity_labels)]
-
-
-# In[213]:
-
-
-# Join the datasets for data source
 
 IP_dataset = IP_role.merge(IP_complexity, how = "outer", on = ["html_url", "title"])
 IP_dataset.rename(columns = {"labels.name_x": "Role Label", "labels.name_y": "Complexity Label", "Runtime_x":"Runtime"}, inplace = True)
 
-
-# In[214]:
-
-
 IP_runtime_nulls_loc = IP_dataset[IP_dataset["Runtime"].isna()].index
 IP_dataset.loc[IP_runtime_nulls_loc, "Runtime"]= IP_dataset[~IP_dataset["Runtime"].isna()].iloc[0,0]
 IP_dataset.drop(columns = ["Runtime_y"], inplace = True)
-
-
-# In[215]:
-
 
 for label in extra_breakdown:
     if len(final_ip2[final_ip2["labels.name"]==label]) > 0:
@@ -1755,49 +1568,54 @@ for label in extra_breakdown:
     elif len(final_ip2[final_ip2["labels.name"]==label]) == 0:
         IP_dataset[label] = 0
 
-
-# In[216]:
-
-
 IP_dataset["Project Board Column"] = "5 - In Progress"
-
-
-# In[218]:
-
 
 # reoder the columns
 IP_dataset2 = IP_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
-IP_dataset2
+
+# Add in unknown status columns
+
+IP_issueswithstatus = final_ip2[final_ip2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
+IP_dataset2["Unknown Status 1"] = IP_dataset2["html_url"].map(lambda x: 0 if x in IP_issueswithstatus else 1) # issues that do not have label in extra_breakdown
+
+IP_dataset2["General Link for Unknown Status 1"] = IP_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+
+IP_dataset2["Role-based Link for Unknown Status 1"] = ""
+for role in nesteddict_unknownstatus1.keys():
+    df = IP_dataset2[IP_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        IP_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
+        
+IP_issues_withstatus_B = final_ip2[final_ip2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
+IP_dataset2["Unknown Status 2"] = IP_dataset2["html_url"].map(lambda x: 0 if x in IP_issues_withstatus_B else 1)
+
+IP_dataset2["General Link for Unknown Status 2"] = IP_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
+
+IP_dataset2["Role-based Link for Unknown Status 2"] = ""
+for role in nesteddict_unknownstatus2.keys():
+    df = IP_dataset2[IP_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        IP_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
+
+
+# In[42]:
 
 
 # Questions / In Review
 
-# In[219]:
-
-
 Q_role = final_questions2[final_questions2["labels.name"].str.contains("role")]
 Q_complexity = final_questions2[final_questions2["labels.name"].isin(complexity_labels)]
-
-
-# In[220]:
-
-
-# Join the datasets for data source
 
 Q_dataset = Q_role.merge(Q_complexity, how = "outer", on = ["html_url", "title"])
 Q_dataset.rename(columns = {"labels.name_x": "Role Label", "labels.name_y": "Complexity Label", "Runtime_x":"Runtime"}, inplace = True)
 
-
-# In[221]:
-
-
 Q_runtime_nulls_loc = Q_dataset[Q_dataset["Runtime"].isna()].index
 Q_dataset.loc[Q_runtime_nulls_loc, "Runtime"]= Q_dataset[~Q_dataset["Runtime"].isna()].iloc[0,0]
 Q_dataset.drop(columns = ["Runtime_y"], inplace = True)
-
-
-# In[222]:
-
 
 for label in extra_breakdown:
     if len(final_questions2[final_questions2["labels.name"]==label]) > 0:
@@ -1807,55 +1625,55 @@ for label in extra_breakdown:
         Q_dataset.rename(columns = {"labels.name": label}, inplace = True)
     elif len(final_questions2[final_questions2["labels.name"]==label]) == 0:
         Q_dataset[label] = 0
-
-
-# In[223]:
-
-
+        
 Q_dataset["Project Board Column"] = "6 - Questions/ In Review"
-
-
-# In[225]:
-
 
 # reoder the columns
 Q_dataset2 = Q_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
-Q_dataset2
+
+# Add in unknown status columns
+
+Q_issueswithstatus = final_questions2[final_questions2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
+Q_dataset2["Unknown Status 1"] = Q_dataset2["html_url"].map(lambda x: 0 if x in Q_issueswithstatus else 1) # issues that do not have label in extra_breakdown
+
+Q_dataset2["General Link for Unknown Status 1"] = Q_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+
+Q_dataset2["Role-based Link for Unknown Status 1"] = ""
+for role in nesteddict_unknownstatus1.keys():
+    df = Q_dataset2[Q_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        Q_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
+        
+Q_issues_withstatus_B = final_questions2[final_questions2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
+Q_dataset2["Unknown Status 2"] = Q_dataset2["html_url"].map(lambda x: 0 if x in Q_issues_withstatus_B else 1)
+
+Q_dataset2["General Link for Unknown Status 2"] = Q_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
+
+Q_dataset2["Role-based Link for Unknown Status 2"] = ""
+for role in nesteddict_unknownstatus2.keys():
+    df = Q_dataset2[Q_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        Q_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
+
+
+# In[43]:
 
 
 # QA
 
-# In[226]:
-
-
 QA_role = final_QA2[final_QA2["labels.name"].str.contains("role")]
 QA_complexity = final_QA2[final_QA2["labels.name"].isin(complexity_labels)]
-
-
-# In[228]:
-
-
-# Join the datasets for data source
 
 QA_dataset = QA_role.merge(QA_complexity, how = "outer", on = ["html_url", "title"])
 QA_dataset.rename(columns = {"labels.name_x": "Role Label", "labels.name_y": "Complexity Label", "Runtime_x":"Runtime"}, inplace = True)
 
-
-# In[229]:
-
-
 QA_runtime_nulls_loc = QA_dataset[QA_dataset["Runtime"].isna()].index
 QA_dataset.loc[QA_runtime_nulls_loc, "Runtime"]= QA_dataset[~QA_dataset["Runtime"].isna()].iloc[0,0]
-
-
-# In[230]:
-
-
 QA_dataset.drop(columns = ["Runtime_y"], inplace = True)
-
-
-# In[231]:
-
 
 for label in extra_breakdown:
     if len(final_QA2[final_QA2["labels.name"]==label]) > 0:
@@ -1865,50 +1683,55 @@ for label in extra_breakdown:
         QA_dataset.rename(columns = {"labels.name": label}, inplace = True)
     elif len(final_QA2[final_QA2["labels.name"]==label]) == 0:
         QA_dataset[label] = 0
-
-
-# In[232]:
-
-
+        
 QA_dataset["Project Board Column"] = "7 - QA"
-
-
-# In[234]:
-
 
 # reoder the columns
 QA_dataset2 = QA_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
-QA_dataset2
+
+# Add in unknown status columns
+
+QA_issueswithstatus = final_QA2[final_QA2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
+QA_dataset2["Unknown Status 1"] = QA_dataset2["html_url"].map(lambda x: 0 if x in QA_issueswithstatus else 1) # issues that do not have label in extra_breakdown
+
+QA_dataset2["General Link for Unknown Status 1"] = QA_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+
+QA_dataset2["Role-based Link for Unknown Status 1"] = ""
+for role in nesteddict_unknownstatus1.keys():
+    df = QA_dataset2[QA_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        QA_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
+        
+QA_issues_withstatus_B = final_QA2[final_QA2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
+QA_dataset2["Unknown Status 2"] = QA_dataset2["html_url"].map(lambda x: 0 if x in QA_issues_withstatus_B else 1)
+
+QA_dataset2["General Link for Unknown Status 2"] = QA_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
+
+QA_dataset2["Role-based Link for Unknown Status 2"] = ""
+for role in nesteddict_unknownstatus2.keys():
+    df = QA_dataset2[QA_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        QA_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
+
+
+# In[44]:
 
 
 # UAT
 
-# In[236]:
-
-
 UAT_role = final_UAT2[final_UAT2["labels.name"].str.contains("role")]
 UAT_complexity = final_UAT2[final_UAT2["labels.name"].isin(complexity_labels)]
-
-
-# In[237]:
-
-
-# Join the datasets for data source
 
 UAT_dataset = UAT_role.merge(UAT_complexity, how = "outer", on = ["html_url", "title"])
 UAT_dataset.rename(columns = {"labels.name_x": "Role Label", "labels.name_y": "Complexity Label", "Runtime_x":"Runtime"}, inplace = True)
 
-
-# In[238]:
-
-
 UAT_runtime_nulls_loc = UAT_dataset[UAT_dataset["Runtime"].isna()].index
 UAT_dataset.loc[UAT_runtime_nulls_loc, "Runtime"]= UAT_dataset[~UAT_dataset["Runtime"].isna()].iloc[0,0]
 UAT_dataset.drop(columns = ["Runtime_y"], inplace = True)
-
-
-# In[239]:
-
 
 for label in extra_breakdown:
     if len(final_UAT2[final_UAT2["labels.name"]==label]) > 0:
@@ -1919,49 +1742,53 @@ for label in extra_breakdown:
     elif len(final_UAT2[final_UAT2["labels.name"]==label]) == 0:
         UAT_dataset[label] = 0
 
-
-# In[240]:
-
-
 UAT_dataset["Project Board Column"] = "8 - UAT"
 
-
-# In[242]:
-
-
-# reoder the columns
 UAT_dataset2 = UAT_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
-UAT_dataset2
+
+# Add in unknown status columns
+
+UAT_issueswithstatus = final_UAT2[final_UAT2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
+UAT_dataset2["Unknown Status 1"] = UAT_dataset2["html_url"].map(lambda x: 0 if x in UAT_issueswithstatus else 1) # issues that do not have label in extra_breakdown
+
+UAT_dataset2["General Link for Unknown Status 1"] = UAT_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+
+UAT_dataset2["Role-based Link for Unknown Status 1"] = ""
+for role in nesteddict_unknownstatus1.keys():
+    df = UAT_dataset2[UAT_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        UAT_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
+        
+UAT_issues_withstatus_B = final_UAT2[final_UAT2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
+UAT_dataset2["Unknown Status 2"] = UAT_dataset2["html_url"].map(lambda x: 0 if x in UAT_issues_withstatus_B else 1)
+
+UAT_dataset2["General Link for Unknown Status 2"] = UAT_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
+
+UAT_dataset2["Role-based Link for Unknown Status 2"] = ""
+for role in nesteddict_unknownstatus2.keys():
+    df = UAT_dataset2[UAT_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        UAT_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
+
+
+# In[45]:
 
 
 # QA - senior review
 
-# In[243]:
-
-
 QA_review_role = final_QA_review2[final_QA_review2["labels.name"].str.contains("role")]
 QA_review_complexity = final_QA_review2[final_QA_review2["labels.name"].isin(complexity_labels)]
-
-
-# In[244]:
-
-
-# Join the datasets for data source
 
 QA_review_dataset = QA_review_role.merge(QA_review_complexity, how = "outer", on = ["html_url", "title"])
 QA_review_dataset.rename(columns = {"labels.name_x": "Role Label", "labels.name_y": "Complexity Label", "Runtime_x":"Runtime"}, inplace = True)
 
-
-# In[245]:
-
-
 QA_review_runtime_nulls_loc = QA_review_dataset[QA_review_dataset["Runtime"].isna()].index
 QA_review_dataset.loc[QA_review_runtime_nulls_loc, "Runtime"]= QA_review_dataset[~QA_review_dataset["Runtime"].isna()].iloc[0,0]
 QA_review_dataset.drop(columns = ["Runtime_y"], inplace = True)
-
-
-# In[246]:
-
 
 for label in extra_breakdown:
     if len(final_QA_review2[final_QA_review2["labels.name"]==label]) > 0:
@@ -1972,81 +1799,71 @@ for label in extra_breakdown:
     elif len(final_QA_review2[final_QA_review2["labels.name"]==label]) == 0:
         QA_review_dataset[label] = 0
 
-
-# In[247]:
-
-
 QA_review_dataset["Project Board Column"] = "9 - QA (senior review)"
 
-
-# In[249]:
-
-
-# reoder the columns
 QA_review_dataset2 = QA_review_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
-QA_review_dataset2
+
+# Add in unknown status columns
+
+QA_review_issueswithstatus = final_QA_review2[final_QA_review2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
+QA_review_dataset2["Unknown Status 1"] = QA_review_dataset2["html_url"].map(lambda x: 0 if x in QA_review_issueswithstatus else 1) # issues that do not have label in extra_breakdown
+
+QA_review_dataset2["General Link for Unknown Status 1"] = QA_review_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+
+QA_review_dataset2["Role-based Link for Unknown Status 1"] = ""
+for role in nesteddict_unknownstatus1.keys():
+    df = QA_review_dataset2[QA_review_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        QA_review_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
+        
+QA_review_issues_withstatus_B = final_QA_review2[final_QA_review2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
+QA_review_dataset2["Unknown Status 2"] = QA_review_dataset2["html_url"].map(lambda x: 0 if x in QA_review_issues_withstatus_B else 1)
+
+QA_review_dataset2["General Link for Unknown Status 2"] = QA_review_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
+
+QA_review_dataset2["Role-based Link for Unknown Status 2"] = ""
+for role in nesteddict_unknownstatus2.keys():
+    df = QA_review_dataset2[QA_review_dataset2["Role Label"] == role]
+    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        QA_review_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
 
 
-# ##### Combine Data from All Project Board Columns
+# ### Combine Data from All Project Board Columns
 
-# In[250]:
+# In[46]:
 
 
 # Concat the dataset and see whether dashboard would work
 final_dataset = pd.concat([icebox_dataset2, ER_dataset2, NIA_dataset2, pb_dataset2, IP_dataset2, Q_dataset2, QA_dataset2, UAT_dataset2, QA_review_dataset2], ignore_index = True)
 
-
-# In[251]:
-
-
 final_dataset.loc[final_dataset[final_dataset["Complexity Label"] == "good first issue"].index, "Complexity Label"] = "1 - good first issue"
-
-
-# In[252]:
-
-
 final_dataset.loc[final_dataset[final_dataset["Complexity Label"] == "Complexity: Small"].index, "Complexity Label"] = "2 - Complexity: Small"
-
-
-# In[253]:
-
-
 final_dataset.loc[final_dataset[final_dataset["Complexity Label"] == "Complexity: Medium"].index, "Complexity Label"] = "3 - Complexity: Medium"
-
-
-# In[254]:
-
-
 final_dataset.loc[final_dataset[final_dataset["Complexity Label"] == "Complexity: Large"].index, "Complexity Label"] = "4 - Complexity: Large"
+final_dataset.loc[final_dataset[final_dataset["Complexity Label"] == "Complexity: Extra Large"].index, "Complexity Label"] = "5 - Complexity: Extra Large"
 
 
-# #### Create Anomaly Detection Dataset
+# ### Create Anomaly Detection Dataset
 
-# In[256]:
+# In[47]:
 
 
 # Concat the dataframes from all columns
 
 anomaly_detection = pd.concat([icebox_issues_df3, ER_issues_df3, NIA_issues_df3, pb_issues_df3, ip_issues_df3, questions_issues_df3, QA_issues_df3, UAT_issues_df3, QA_review_issues_df3], ignore_index = True)
-
-# In[259]:
-
-
 anomaly_detection["keep"] = anomaly_detection["labels.name"].map(lambda x: 1 if (re.search(r"(size|feature|role|complexity|good first issue|prework|^$)", str(x).lower())) else 0)
-
-
-# In[260]:
-
-
 anomaly_detection_df = anomaly_detection[anomaly_detection["keep"] == 1]
-
-
-# In[262]:
-
-
 anomaly_detection_df.drop(columns = ["keep"], inplace = True)
 
-# In[263]:
+
+# ### Send Data to Google Sheets
+
+# In[ ]:
+
 
 from google.oauth2 import service_account
 from gspread_dataframe import set_with_dataframe
@@ -2095,15 +1912,8 @@ official_labels = list(LC_df["label_name"].unique())
 
 outdated_labels = list(LC_df[LC_df["in_use?"] == "No"]["label_name"].unique())
 
-# In[264]:
-
-
 anomaly_detection_df["labels_need_action"] = anomaly_detection_df["labels.name"].map(lambda x: 1 if (x not in official_labels or x in outdated_labels) else 0)
 anomaly_detection_df = anomaly_detection_df.iloc[:, [4,1,2,3,0,5]]
-
-
-# In[266]:
-
 
 anomaly_detection_df2_base = anomaly_detection_df.copy()
 anomaly_detection_df2_base.drop(columns = ["labels_need_action"], inplace = True)
@@ -2127,10 +1937,6 @@ anomaly_detection_df2["Size defined label"] = anomaly_detection_df2["Size Label"
 anomaly_detection_df2_join = anomaly_detection_df2_base[anomaly_detection_df2_base["Role Label"] == 1][["html_url", "labels.name"]]
 anomaly_detection_df2 = anomaly_detection_df2.merge(anomaly_detection_df2_join, how = "left", on = ["html_url"])
 
-
-# In[267]:
-
-
 missing_dependency = anomaly_detection[(anomaly_detection["labels.name"] == "dependency missing") & (anomaly_detection["Project Board Column"] == "1 - Icebox")]
 
 missing_dependency = missing_dependency.iloc[:, [1,4,2,3,0]]
@@ -2140,9 +1946,7 @@ if len(missing_dependency) == 0:
 else:
     missing_dependency
 
-# ### Send to Google Sheet
-
-# In[272]:
+### Send to Google Sheet
 
 Main_GOOGLE_SHEETS_ID = '1aJ0yHkXYMWTtMz6eEeolTLmAQOBc2DyptmR5SAmUrjM'
 
@@ -2152,43 +1956,30 @@ gs = gc.open_by_key(Main_GOOGLE_SHEETS_ID)
 
 worksheet1 = gs.worksheet(sheet_name1)
 
-
-# In[273]:
-
-
 worksheet1.clear()
-
-
-# In[274]:
 
 
 # Insert dataframe of issues into Google Sheet
 
 set_with_dataframe(worksheet = worksheet1, dataframe = final_dataset, include_index = False, include_column_header = True, resize = True)
 
-
-# In[275]:
-
 sheet_name2 = 'Labels to note'
 worksheet2 = gs.worksheet(sheet_name2)
 worksheet2.clear()
 set_with_dataframe(worksheet = worksheet2, dataframe = anomaly_detection_df, include_index = False, include_column_header = True, resize = True)
-
-
-# In[276]:
 
 sheet_name3 = 'Missing Labels'
 worksheet3 = gs.worksheet(sheet_name3)
 worksheet3.clear()
 set_with_dataframe(worksheet = worksheet3, dataframe = anomaly_detection_df2, include_index = False, include_column_header = True, resize = True)
 
-
-# In[277]:
-
 sheet_name4 = 'Missing Dependency Issues'
 worksheet4 = gs.worksheet(sheet_name4)
 worksheet4.clear()
 set_with_dataframe(worksheet = worksheet4, dataframe = missing_dependency, include_index = False, include_column_header = True, resize = True)
+
+
+# In[ ]:
 
 
 
