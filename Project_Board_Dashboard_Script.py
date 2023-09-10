@@ -30,7 +30,6 @@ user = 'kimberlytanyh'
 ### Get Cards in Ice Box
 
 url = 'https://api.github.com/projects/columns/7198227/cards'
-headers = {"Authorization": GitHub_token}
 ice_box = pd.DataFrame()
 
 for i in range(1, 11):
@@ -39,7 +38,7 @@ for i in range(1, 11):
     df = pd.DataFrame(response.json())
     if len(df) > 0:
         ice_box = pd.concat([ice_box, df], ignore_index = True)
-    else: 
+    else:
         break
 
 
@@ -49,7 +48,6 @@ for i in range(1, 11):
 ### Get Cards in ER Column
 
 url = 'https://api.github.com/projects/columns/19403960/cards'
-headers = {"Authorization": GitHub_token}
 er = pd.DataFrame()
 
 for i in range(1, 11):
@@ -68,7 +66,6 @@ for i in range(1, 11):
 ### Get Cards in New Issue Approval Column
 
 url = 'https://api.github.com/projects/columns/15235217/cards'
-headers = {"Authorization": GitHub_token}
 newissue_approval = pd.DataFrame()
 
 for i in range(1, 11):
@@ -87,7 +84,6 @@ for i in range(1, 11):
 ### Get Cards in Prioritized Backlog Column
 
 url = 'https://api.github.com/projects/columns/7198257/cards'
-headers = {"Authorization": GitHub_token}
 prioritized_backlog = pd.DataFrame()
 
 for i in range(1, 11):
@@ -106,7 +102,6 @@ for i in range(1, 11):
 ### Get Cards in "In Progress (Actively Working)" Column
 
 url = 'https://api.github.com/projects/columns/7198228/cards'
-headers = {"Authorization": GitHub_token}
 in_progress = pd.DataFrame()
 
 for i in range(1, 11):
@@ -125,7 +120,6 @@ for i in range(1, 11):
 ### Get Cards in Questions/In Review Column
 
 url = 'https://api.github.com/projects/columns/8178690/cards'
-headers = {"Authorization": GitHub_token}
 questions = pd.DataFrame()
 
 for i in range(1, 11):
@@ -144,7 +138,6 @@ for i in range(1, 11):
 ### Get Cards in QA Column
 
 url = 'https://api.github.com/projects/columns/15490305/cards'
-headers = {"Authorization": GitHub_token}
 QA = pd.DataFrame()
 
 for i in range(1, 11):
@@ -163,7 +156,6 @@ for i in range(1, 11):
 ### Get Cards in UAT Column
 
 url = 'https://api.github.com/projects/columns/17206624/cards'
-headers = {"Authorization": GitHub_token}
 UAT = pd.DataFrame()
 
 for i in range(1, 11):
@@ -182,7 +174,6 @@ for i in range(1, 11):
 ### Get Cards in "QA - senior review" Column
 
 url = 'https://api.github.com/projects/columns/19257634/cards'
-headers = {"Authorization": GitHub_token}
 QA_review = pd.DataFrame()
 
 for i in range(1, 11):
@@ -291,9 +282,7 @@ icebox_no_labels_df = icebox_issues_df[icebox_issues_df["html_url"].isin(icebox_
 icebox_no_labels_df["labels.name"] = ""
 icebox_no_labels_df = icebox_no_labels_df.iloc[:, [3,0,1,2]]
 
-# CHANGES MADE HERE!!!!!
 icebox_issues_df3 = pd.concat([icebox_issues_df2, icebox_no_labels_df], ignore_index = True)
-############################################################################################
 
 icebox_issues_df3["Project Board Column"] = "1 - Icebox"
 
@@ -1202,178 +1191,63 @@ icebox_dataset2 = icebox_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
 # In[27]:
 
 
-icebox_issueswithstatus = final_icebox2[final_icebox2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
-icebox_dataset2["Unknown Status 1"] = icebox_dataset2["html_url"].map(lambda x: 0 if x in icebox_issueswithstatus else 1) # issues that do not have label in extra_breakdown
+# Create a column to identify issues with unknown status
+icebox_unknown_status_wdataset = final_icebox2.copy()
+icebox_unknown_status_wdataset["Known Status"] = icebox_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
+icebox_known_status_issues = list(icebox_unknown_status_wdataset[icebox_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
+icebox_dataset2["Unknown Status"] = icebox_dataset2["html_url"].map(lambda x: 0 if x in icebox_known_status_issues else 1) 
 
 
 # In[28]:
 
 
-# Add in static link for Unknown Status 1
+# Create nested dictionary for static links
 
-complexity_link = {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22good+first+issue%22",
-                   "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+small%22", 
-                   "Complexity: Medium":"https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+medium%22",
-                   "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+large%22",
-                   "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+extra+large%22",
-                   "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+missing%22",
-                   "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+prework%22",
-                   "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+see+issue+making+label%22",
-                  "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22prework%22",
-                  "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+good+second+issue%22"}
+icebox_unique_roles = list(icebox_dataset2["Role Label"].unique())
+icebox_unique_roles2 = [x for x in icebox_unique_roles if x != "role: front end and backend/DevOps"]
+icebox_unique_complexity = list(icebox_dataset2["Complexity Label"].unique())
+static_link_1_base = 'https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22ready+for+product%22+-label%3A%22ready+for+design+lead%22+-label%3A%22ready+for+org+rep%22'
 
 
 # In[29]:
 
 
-icebox_dataset2["General Link for Unknown Status 1"] = icebox_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+icebox_link_dict = { }
+
+for role in icebox_unique_roles:
+    icebox_link_dict[role] = {}
+    for complexity in icebox_unique_complexity:
+        role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
+        complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+        icebox_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+
+icebox_link_dict["role: front end and backend/DevOps"] = {}     
+for complexity in icebox_unique_complexity:
+    frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
+    backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
+    complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+    icebox_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
 
 
 # In[30]:
 
 
-nesteddict_unknownstatus1 = {"role: front end": {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22good+first+issue%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                 "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+small%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                 "Complexity: Medium": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+medium%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                 "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+large%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                 "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+extra+large%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                 "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+missing%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                 "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+prework%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                 "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+see+issue+making+label%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22prework%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+good+second+issue%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22"},
-                             "role: back end/devOps": {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22good+first+issue%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                       "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+small%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                       "Complexity: Medium": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+medium%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                       "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+large%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                       "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+extra+large%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                       "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+missing%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                       "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+prework%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                       "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+see+issue+making+label%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                      "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22prework%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                      "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+good+second+issue%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22"},
-                             "role: front end and backend/DevOps": {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22good+first+issue%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                    "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+small%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                    "Complexity: Medium": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+medium%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                    "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+large%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                    "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+extra+large%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                    "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+missing%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                    "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+prework%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                    "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+see+issue+making+label%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                   "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22prework%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                   "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+good+second+issue%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22"},
-                             "role: dev leads": {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22good+first+issue%22+label%3A%22role%3A+dev+leads%22",
-                                                 "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+small%22+label%3A%22role%3A+dev+leads%22",
-                                                 "Complexity: Medium": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+medium%22+label%3A%22role%3A+dev+leads%22",
-                                                 "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+large%22+label%3A%22role%3A+dev+leads%22",
-                                                 "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+extra+large%22+label%3A%22role%3A+dev+leads%22",
-                                                 "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+missing%22+label%3A%22role%3A+dev+leads%22",
-                                                 "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+prework%22+label%3A%22role%3A+dev+leads%22",
-                                                 "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+see+issue+making+label%22+label%3A%22role%3A+dev+leads%22",
-                                                "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22prework%22+label%3A%22role%3A+dev+leads%22",
-                                                "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%222+weeks+inactive%22+-label%3A%22ready+for+product%22+-label%3A%22draft%22+-label%3A%22ready+for+prioritization%22+-label%3A%22ready+for+dev+lead%22+label%3A%22complexity%3A+good+second+issue%22+label%3A%22role%3A+dev+leads%22"}
-                            }               
+icebox_dataset2["Role-based Link for Unknown Status"] = ""
+for role in icebox_link_dict.keys():
+    df = icebox_dataset2[icebox_dataset2["Role Label"] == role]
+    for complexity in icebox_link_dict[list(icebox_link_dict.keys())[0]].keys(): #same for all roles
+        df2 = df[df["Complexity Label"] == complexity]
+        indexes = df2.index
+        icebox_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = icebox_link_dict[role][complexity]
 
 
 # In[31]:
 
 
-icebox_dataset2["Role-based Link for Unknown Status 1"] = ""
-for role in nesteddict_unknownstatus1.keys():
-    df = icebox_dataset2[icebox_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
-        df2 = df[df["Complexity Label"] == complexity]
-        indexes = df2.index
-        icebox_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
+icebox_dataset2["General Link for Developer Unknown Status"] = "" 
 
 
 # In[32]:
-
-
-icebox_issues_withstatus_B = final_icebox2[final_icebox2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
-icebox_dataset2["Unknown Status 2"] = icebox_dataset2["html_url"].map(lambda x: 0 if x in icebox_issues_withstatus_B else 1)
-
-
-# In[33]:
-
-
-complexity_link_B = {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22good+first+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22",
-                   "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+small%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22", 
-                   "Complexity: Medium":"https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+medium%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22",
-                   "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22",
-                   "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+extra+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22",
-                   "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+missing%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22",
-                   "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22",
-                   "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+see+issue+making+label%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22",
-                    "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22",
-                    "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+good+second+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22"}
-
-
-# In[34]:
-
-
-icebox_dataset2["General Link for Unknown Status 2"] = icebox_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
-
-
-# In[36]:
-
-
-nesteddict_unknownstatus2 = {"role: front end": {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22good+first+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                 "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+small%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                 "Complexity: Medium": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+medium%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                 "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                 "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+extra+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                 "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+missing%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                 "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                 "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+see+issue+making+label%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22",
-                                                "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+good+second+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+-label%3A%22role%3A+back+end%2Fdevops%22"},
-                             "role: back end/devOps": {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22good+first+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                       "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+small%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                       "Complexity: Medium": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+medium%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                       "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                       "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+extra+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                       "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+missing%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                       "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                       "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+see+issue+making+label%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                      "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                      "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+good+second+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22"},
-                             "role: front end and backend/DevOps": {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22good+first+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                    "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+small%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                    "Complexity: Medium": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+medium%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                    "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                    "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+extra+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                    "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+missing%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                    "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                    "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                   "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22good+first+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22",
-                                                                   "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+good+second+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+front+end%22+label%3A%22role%3A+back+end%2Fdevops%22"},
-                             "role: dev leads": {"good first issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22good+first+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
-                                                 "Complexity: Small": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+small%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
-                                                 "Complexity: Medium": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+medium%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
-                                                 "Complexity: Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
-                                                 "Complexity: Extra Large": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+extra+large%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
-                                                 "Complexity: Missing": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+missing%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
-                                                 "Complexity: Prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
-                                                 "Complexity: See issue making label": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+see+issue+making+label%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
-                                                "prework": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22prework%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22",
-                                                "Complexity: Good second issue": "https://github.com/hackforla/website/projects/7?card_filter_query=label%3A%22complexity%3A+good+second+issue%22+-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+label%3A%22role%3A+dev+leads%22"}
-                            }               
-
-
-# In[37]:
-
-
-icebox_dataset2["Role-based Link for Unknown Status 2"] = ""
-for role in nesteddict_unknownstatus2.keys():
-    df = icebox_dataset2[icebox_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
-        df2 = df[df["Complexity Label"] == complexity]
-        indexes = df2.index
-        icebox_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
-
-
-# In[38]:
 
 
 # Emergent Request
@@ -1402,31 +1276,64 @@ ER_dataset["Project Board Column"] = "2 - ER"
 # reoder the columns
 ER_dataset2 = ER_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
 
-ER_issueswithstatus = final_ER2[final_ER2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
-ER_dataset2["Unknown Status 1"] = ER_dataset2["html_url"].map(lambda x: 0 if x in ER_issueswithstatus else 1) # issues that do not have label in extra_breakdown
 
-ER_dataset2["General Link for Unknown Status 1"] = ER_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+# In[33]:
 
-ER_dataset2["Role-based Link for Unknown Status 1"] = ""
-for role in nesteddict_unknownstatus1.keys():
+
+# Create a column to identify issues with unknown status
+ER_unknown_status_wdataset = final_ER2.copy()
+ER_unknown_status_wdataset["Known Status"] = ER_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
+ER_known_status_issues = list(ER_unknown_status_wdataset[ER_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
+ER_dataset2["Unknown Status"] = ER_dataset2["html_url"].map(lambda x: 0 if x in ER_known_status_issues else 1) 
+
+
+# In[34]:
+
+
+# Create nested dictionary for static links
+
+ER_unique_roles = list(ER_dataset2["Role Label"].unique())
+ER_unique_roles2 = [x for x in ER_unique_roles if x != "role: front end and backend/DevOps"]
+ER_unique_complexity = list(ER_dataset2["Complexity Label"].unique())
+static_link_1_base = 'https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22ready+for+product%22+-label%3A%22ready+for+design+lead%22+-label%3A%22ready+for+org+rep%22'
+
+
+# In[35]:
+
+
+ER_link_dict = { }
+
+for role in ER_unique_roles:
+    ER_link_dict[role] = {}
+    for complexity in ER_unique_complexity:
+        role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
+        complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+        ER_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+
+ER_link_dict["role: front end and backend/DevOps"] = {}     
+for complexity in ER_unique_complexity:
+    frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
+    backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
+    complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+    ER_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+
+
+# In[36]:
+
+
+ER_dataset2["Role-based Link for Unknown Status"] = ""
+for role in ER_link_dict.keys():
     df = ER_dataset2[ER_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+    for complexity in ER_link_dict[list(ER_link_dict.keys())[0]].keys(): #same for all roles
         df2 = df[df["Complexity Label"] == complexity]
         indexes = df2.index
-        ER_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
-        
-ER_issues_withstatus_B = final_ER2[final_ER2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
-ER_dataset2["Unknown Status 2"] = ER_dataset2["html_url"].map(lambda x: 0 if x in ER_issues_withstatus_B else 1)
+        ER_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = ER_link_dict[role][complexity]
 
-ER_dataset2["General Link for Unknown Status 2"] = ER_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
 
-ER_dataset2["Role-based Link for Unknown Status 2"] = ""
-for role in nesteddict_unknownstatus2.keys():
-    df = ER_dataset2[ER_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
-        df2 = df[df["Complexity Label"] == complexity]
-        indexes = df2.index
-        ER_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
+# In[37]:
+
+
+ER_dataset2["General Link for Developer Unknown Status"] = "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22ready+for+product%22+-label%3A%22role%3A+design%22+-label%3A%22role%3A+research+lead%22+-label%3A%22role%3A+writing%22+-label%3A%22ready+for+design+lead%22+-label%3A%22ready+for+org+rep%22+-label%3A%22role%3A+data+analyst%22" 
 
 
 # In[39]:
@@ -1458,33 +1365,43 @@ NIA_dataset["Project Board Column"] = "3 - New Issue Approval"
 
 NIA_dataset2 = NIA_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
 
-# Add in unknown status columns
+# Create a column to identify issues with unknown status
+NIA_unknown_status_wdataset = final_NIA2.copy()
+NIA_unknown_status_wdataset["Known Status"] = NIA_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
+NIA_known_status_issues = list(NIA_unknown_status_wdataset[NIA_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
+NIA_dataset2["Unknown Status"] = NIA_dataset2["html_url"].map(lambda x: 0 if x in NIA_known_status_issues else 1) 
 
-NIA_issueswithstatus = final_NIA2[final_NIA2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
-NIA_dataset2["Unknown Status 1"] = NIA_dataset2["html_url"].map(lambda x: 0 if x in NIA_issueswithstatus else 1) # issues that do not have label in extra_breakdown
+# Create nested dictionary for static links
 
-NIA_dataset2["General Link for Unknown Status 1"] = NIA_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+NIA_unique_roles = list(NIA_dataset2["Role Label"].unique())
+NIA_unique_roles2 = [x for x in NIA_unique_roles if x != "role: front end and backend/DevOps"]
+NIA_unique_complexity = list(NIA_dataset2["Complexity Label"].unique())
 
-NIA_dataset2["Role-based Link for Unknown Status 1"] = ""
-for role in nesteddict_unknownstatus1.keys():
+NIA_link_dict = { }
+
+for role in NIA_unique_roles:
+    NIA_link_dict[role] = {}
+    for complexity in NIA_unique_complexity:
+        role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
+        complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+        NIA_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+
+NIA_link_dict["role: front end and backend/DevOps"] = {}     
+for complexity in NIA_unique_complexity:
+    frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
+    backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
+    complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+    NIA_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    
+NIA_dataset2["Role-based Link for Unknown Status"] = ""
+for role in NIA_link_dict.keys():
     df = NIA_dataset2[NIA_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+    for complexity in NIA_link_dict[list(NIA_link_dict.keys())[0]].keys(): #same for all roles
         df2 = df[df["Complexity Label"] == complexity]
         indexes = df2.index
-        NIA_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
-        
-NIA_issues_withstatus_B = final_NIA2[final_NIA2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
-NIA_dataset2["Unknown Status 2"] = NIA_dataset2["html_url"].map(lambda x: 0 if x in NIA_issues_withstatus_B else 1)
+        NIA_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = NIA_link_dict[role][complexity]
 
-NIA_dataset2["General Link for Unknown Status 2"] = NIA_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
-
-NIA_dataset2["Role-based Link for Unknown Status 2"] = ""
-for role in nesteddict_unknownstatus2.keys():
-    df = NIA_dataset2[NIA_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
-        df2 = df[df["Complexity Label"] == complexity]
-        indexes = df2.index
-        NIA_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
+NIA_dataset2["General Link for Developer Unknown Status"] = "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22ready+for+product%22+-label%3A%22role%3A+design%22+-label%3A%22role%3A+research+lead%22+-label%3A%22role%3A+writing%22+-label%3A%22ready+for+design+lead%22+-label%3A%22ready+for+org+rep%22+-label%3A%22role%3A+data+analyst%22" 
 
 
 # In[40]:
@@ -1515,33 +1432,43 @@ pb_dataset["Project Board Column"] = "4 - Prioritized Backlog"
 
 pb_dataset2 = pb_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
 
-# Add in unknown status columns
+# Create a column to identify issues with unknown status
+pb_unknown_status_wdataset = final_pb2.copy()
+pb_unknown_status_wdataset["Known Status"] = pb_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
+pb_known_status_issues = list(pb_unknown_status_wdataset[pb_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
+pb_dataset2["Unknown Status"] = pb_dataset2["html_url"].map(lambda x: 0 if x in pb_known_status_issues else 1) 
 
-pb_issueswithstatus = final_pb2[final_pb2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
-pb_dataset2["Unknown Status 1"] = pb_dataset2["html_url"].map(lambda x: 0 if x in pb_issueswithstatus else 1) # issues that do not have label in extra_breakdown
+# Create nested dictionary for static links
 
-pb_dataset2["General Link for Unknown Status 1"] = pb_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+pb_unique_roles = list(pb_dataset2["Role Label"].unique())
+pb_unique_roles2 = [x for x in pb_unique_roles if x != "role: front end and backend/DevOps"]
+pb_unique_complexity = list(pb_dataset2["Complexity Label"].unique())
 
-pb_dataset2["Role-based Link for Unknown Status 1"] = ""
-for role in nesteddict_unknownstatus1.keys():
+pb_link_dict = { }
+
+for role in pb_unique_roles:
+    pb_link_dict[role] = {}
+    for complexity in pb_unique_complexity:
+        role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
+        complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+        pb_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+
+pb_link_dict["role: front end and backend/DevOps"] = {}     
+for complexity in pb_unique_complexity:
+    frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
+    backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
+    complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+    pb_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    
+pb_dataset2["Role-based Link for Unknown Status"] = ""
+for role in pb_link_dict.keys():
     df = pb_dataset2[pb_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+    for complexity in pb_link_dict[list(pb_link_dict.keys())[0]].keys(): #same for all roles
         df2 = df[df["Complexity Label"] == complexity]
         indexes = df2.index
-        pb_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
-        
-pb_issues_withstatus_B = final_pb2[final_pb2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
-pb_dataset2["Unknown Status 2"] = pb_dataset2["html_url"].map(lambda x: 0 if x in pb_issues_withstatus_B else 1)
+        pb_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = pb_link_dict[role][complexity]
 
-pb_dataset2["General Link for Unknown Status 2"] = pb_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
-
-pb_dataset2["Role-based Link for Unknown Status 2"] = ""
-for role in nesteddict_unknownstatus2.keys():
-    df = pb_dataset2[pb_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
-        df2 = df[df["Complexity Label"] == complexity]
-        indexes = df2.index
-        pb_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
+pb_dataset2["General Link for Developer Unknown Status"] = ""
 
 
 # In[41]:
@@ -1573,33 +1500,43 @@ IP_dataset["Project Board Column"] = "5 - In Progress"
 # reoder the columns
 IP_dataset2 = IP_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
 
-# Add in unknown status columns
+# Create a column to identify issues with unknown status
+IP_unknown_status_wdataset = final_ip2.copy()
+IP_unknown_status_wdataset["Known Status"] = IP_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
+IP_known_status_issues = list(IP_unknown_status_wdataset[IP_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
+IP_dataset2["Unknown Status"] = IP_dataset2["html_url"].map(lambda x: 0 if x in IP_known_status_issues else 1) 
 
-IP_issueswithstatus = final_ip2[final_ip2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
-IP_dataset2["Unknown Status 1"] = IP_dataset2["html_url"].map(lambda x: 0 if x in IP_issueswithstatus else 1) # issues that do not have label in extra_breakdown
+# Create nested dictionary for static links
 
-IP_dataset2["General Link for Unknown Status 1"] = IP_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+IP_unique_roles = list(IP_dataset2["Role Label"].unique())
+IP_unique_roles2 = [x for x in IP_unique_roles if x != "role: front end and backend/DevOps"]
+IP_unique_complexity = list(IP_dataset2["Complexity Label"].unique())
 
-IP_dataset2["Role-based Link for Unknown Status 1"] = ""
-for role in nesteddict_unknownstatus1.keys():
+IP_link_dict = { }
+
+for role in IP_unique_roles:
+    IP_link_dict[role] = {}
+    for complexity in IP_unique_complexity:
+        role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
+        complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+        IP_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+
+IP_link_dict["role: front end and backend/DevOps"] = {}     
+for complexity in IP_unique_complexity:
+    frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
+    backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
+    complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+    IP_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    
+IP_dataset2["Role-based Link for Unknown Status"] = ""
+for role in IP_link_dict.keys():
     df = IP_dataset2[IP_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+    for complexity in IP_link_dict[list(IP_link_dict.keys())[0]].keys(): #same for all roles
         df2 = df[df["Complexity Label"] == complexity]
         indexes = df2.index
-        IP_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
-        
-IP_issues_withstatus_B = final_ip2[final_ip2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
-IP_dataset2["Unknown Status 2"] = IP_dataset2["html_url"].map(lambda x: 0 if x in IP_issues_withstatus_B else 1)
+        IP_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = IP_link_dict[role][complexity]
 
-IP_dataset2["General Link for Unknown Status 2"] = IP_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
-
-IP_dataset2["Role-based Link for Unknown Status 2"] = ""
-for role in nesteddict_unknownstatus2.keys():
-    df = IP_dataset2[IP_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
-        df2 = df[df["Complexity Label"] == complexity]
-        indexes = df2.index
-        IP_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
+IP_dataset2["General Link for Developer Unknown Status"] = ""
 
 
 # In[42]:
@@ -1633,31 +1570,43 @@ Q_dataset2 = Q_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
 
 # Add in unknown status columns
 
-Q_issueswithstatus = final_questions2[final_questions2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
-Q_dataset2["Unknown Status 1"] = Q_dataset2["html_url"].map(lambda x: 0 if x in Q_issueswithstatus else 1) # issues that do not have label in extra_breakdown
+# Create a column to identify issues with unknown status
+Q_unknown_status_wdataset = final_questions2.copy()
+Q_unknown_status_wdataset["Known Status"] = Q_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
+Q_known_status_issues = list(Q_unknown_status_wdataset[Q_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
+Q_dataset2["Unknown Status"] = Q_dataset2["html_url"].map(lambda x: 0 if x in Q_known_status_issues else 1) 
 
-Q_dataset2["General Link for Unknown Status 1"] = Q_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+# Create nested dictionary for static links
 
-Q_dataset2["Role-based Link for Unknown Status 1"] = ""
-for role in nesteddict_unknownstatus1.keys():
+Q_unique_roles = list(Q_dataset2["Role Label"].unique())
+Q_unique_roles2 = [x for x in Q_unique_roles if x != "role: front end and backend/DevOps"]
+Q_unique_complexity = list(Q_dataset2["Complexity Label"].unique())
+
+Q_link_dict = { }
+
+for role in Q_unique_roles:
+    Q_link_dict[role] = {}
+    for complexity in Q_unique_complexity:
+        role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
+        complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+        Q_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+
+Q_link_dict["role: front end and backend/DevOps"] = {}     
+for complexity in Q_unique_complexity:
+    frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
+    backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
+    complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+    Q_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    
+Q_dataset2["Role-based Link for Unknown Status"] = ""
+for role in Q_link_dict.keys():
     df = Q_dataset2[Q_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+    for complexity in Q_link_dict[list(Q_link_dict.keys())[0]].keys(): #same for all roles
         df2 = df[df["Complexity Label"] == complexity]
         indexes = df2.index
-        Q_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
-        
-Q_issues_withstatus_B = final_questions2[final_questions2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
-Q_dataset2["Unknown Status 2"] = Q_dataset2["html_url"].map(lambda x: 0 if x in Q_issues_withstatus_B else 1)
+        Q_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = Q_link_dict[role][complexity]
 
-Q_dataset2["General Link for Unknown Status 2"] = Q_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
-
-Q_dataset2["Role-based Link for Unknown Status 2"] = ""
-for role in nesteddict_unknownstatus2.keys():
-    df = Q_dataset2[Q_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
-        df2 = df[df["Complexity Label"] == complexity]
-        indexes = df2.index
-        Q_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
+Q_dataset2["General Link for Developer Unknown Status"] = ""
 
 
 # In[43]:
@@ -1691,31 +1640,43 @@ QA_dataset2 = QA_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
 
 # Add in unknown status columns
 
-QA_issueswithstatus = final_QA2[final_QA2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
-QA_dataset2["Unknown Status 1"] = QA_dataset2["html_url"].map(lambda x: 0 if x in QA_issueswithstatus else 1) # issues that do not have label in extra_breakdown
+# Create a column to identify issues with unknown status
+QA_unknown_status_wdataset = final_QA2.copy()
+QA_unknown_status_wdataset["Known Status"] = QA_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
+QA_known_status_issues = list(QA_unknown_status_wdataset[QA_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
+QA_dataset2["Unknown Status"] = QA_dataset2["html_url"].map(lambda x: 0 if x in QA_known_status_issues else 1) 
 
-QA_dataset2["General Link for Unknown Status 1"] = QA_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+# Create nested dictionary for static links
 
-QA_dataset2["Role-based Link for Unknown Status 1"] = ""
-for role in nesteddict_unknownstatus1.keys():
+QA_unique_roles = list(QA_dataset2["Role Label"].unique())
+QA_unique_roles2 = [x for x in QA_unique_roles if x != "role: front end and backend/DevOps"]
+QA_unique_complexity = list(QA_dataset2["Complexity Label"].unique())
+
+QA_link_dict = { }
+
+for role in QA_unique_roles:
+    QA_link_dict[role] = {}
+    for complexity in QA_unique_complexity:
+        role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
+        complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+        QA_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+
+QA_link_dict["role: front end and backend/DevOps"] = {}     
+for complexity in QA_unique_complexity:
+    frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
+    backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
+    complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+    QA_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    
+QA_dataset2["Role-based Link for Unknown Status"] = ""
+for role in QA_link_dict.keys():
     df = QA_dataset2[QA_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+    for complexity in QA_link_dict[list(QA_link_dict.keys())[0]].keys(): #same for all roles
         df2 = df[df["Complexity Label"] == complexity]
         indexes = df2.index
-        QA_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
-        
-QA_issues_withstatus_B = final_QA2[final_QA2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
-QA_dataset2["Unknown Status 2"] = QA_dataset2["html_url"].map(lambda x: 0 if x in QA_issues_withstatus_B else 1)
+        QA_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = QA_link_dict[role][complexity]
 
-QA_dataset2["General Link for Unknown Status 2"] = QA_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
-
-QA_dataset2["Role-based Link for Unknown Status 2"] = ""
-for role in nesteddict_unknownstatus2.keys():
-    df = QA_dataset2[QA_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
-        df2 = df[df["Complexity Label"] == complexity]
-        indexes = df2.index
-        QA_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
+QA_dataset2["General Link for Developer Unknown Status"] = ""
 
 
 # In[44]:
@@ -1748,31 +1709,43 @@ UAT_dataset2 = UAT_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
 
 # Add in unknown status columns
 
-UAT_issueswithstatus = final_UAT2[final_UAT2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
-UAT_dataset2["Unknown Status 1"] = UAT_dataset2["html_url"].map(lambda x: 0 if x in UAT_issueswithstatus else 1) # issues that do not have label in extra_breakdown
+# Create a column to identify issues with unknown status
+UAT_unknown_status_wdataset = final_UAT2.copy()
+UAT_unknown_status_wdataset["Known Status"] = UAT_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
+UAT_known_status_issues = list(UAT_unknown_status_wdataset[UAT_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
+UAT_dataset2["Unknown Status"] = UAT_dataset2["html_url"].map(lambda x: 0 if x in UAT_known_status_issues else 1) 
 
-UAT_dataset2["General Link for Unknown Status 1"] = UAT_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+# Create nested dictionary for static links
 
-UAT_dataset2["Role-based Link for Unknown Status 1"] = ""
-for role in nesteddict_unknownstatus1.keys():
+UAT_unique_roles = list(UAT_dataset2["Role Label"].unique())
+UAT_unique_roles2 = [x for x in UAT_unique_roles if x != "role: front end and backend/DevOps"]
+UAT_unique_complexity = list(UAT_dataset2["Complexity Label"].unique())
+
+UAT_link_dict = { }
+
+for role in UAT_unique_roles:
+    UAT_link_dict[role] = {}
+    for complexity in UAT_unique_complexity:
+        role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
+        complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+        UAT_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+
+UAT_link_dict["role: front end and backend/DevOps"] = {}     
+for complexity in UAT_unique_complexity:
+    frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
+    backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
+    complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+    UAT_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    
+UAT_dataset2["Role-based Link for Unknown Status"] = ""
+for role in UAT_link_dict.keys():
     df = UAT_dataset2[UAT_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+    for complexity in UAT_link_dict[list(UAT_link_dict.keys())[0]].keys(): #same for all roles
         df2 = df[df["Complexity Label"] == complexity]
         indexes = df2.index
-        UAT_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
-        
-UAT_issues_withstatus_B = final_UAT2[final_UAT2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
-UAT_dataset2["Unknown Status 2"] = UAT_dataset2["html_url"].map(lambda x: 0 if x in UAT_issues_withstatus_B else 1)
+        UAT_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = UAT_link_dict[role][complexity]
 
-UAT_dataset2["General Link for Unknown Status 2"] = UAT_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
-
-UAT_dataset2["Role-based Link for Unknown Status 2"] = ""
-for role in nesteddict_unknownstatus2.keys():
-    df = UAT_dataset2[UAT_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
-        df2 = df[df["Complexity Label"] == complexity]
-        indexes = df2.index
-        UAT_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
+UAT_dataset2["General Link for Developer Unknown Status"] = ""
 
 
 # In[45]:
@@ -1805,31 +1778,44 @@ QA_review_dataset2 = QA_review_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
 
 # Add in unknown status columns
 
-QA_review_issueswithstatus = final_QA_review2[final_QA_review2["labels.name"].isin(extra_breakdown)]["html_url"].unique()
-QA_review_dataset2["Unknown Status 1"] = QA_review_dataset2["html_url"].map(lambda x: 0 if x in QA_review_issueswithstatus else 1) # issues that do not have label in extra_breakdown
 
-QA_review_dataset2["General Link for Unknown Status 1"] = QA_review_dataset2["Complexity Label"].map(lambda x: complexity_link[x]) # issues that do not have label in extra_breakdown
+# Create a column to identify issues with unknown status
+QA_review_unknown_status_wdataset = final_QA_review2.copy()
+QA_review_unknown_status_wdataset["Known Status"] = QA_review_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
+QA_review_known_status_issues = list(QA_review_unknown_status_wdataset[QA_review_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
+QA_review_dataset2["Unknown Status"] = QA_review_dataset2["html_url"].map(lambda x: 0 if x in QA_review_known_status_issues else 1) 
 
-QA_review_dataset2["Role-based Link for Unknown Status 1"] = ""
-for role in nesteddict_unknownstatus1.keys():
+# Create nested dictionary for static links
+
+QA_review_unique_roles = list(QA_review_dataset2["Role Label"].unique())
+QA_review_unique_roles2 = [x for x in QA_review_unique_roles if x != "role: front end and backend/DevOps"]
+QA_review_unique_complexity = list(QA_review_dataset2["Complexity Label"].unique())
+
+QA_review_link_dict = { }
+
+for role in QA_review_unique_roles:
+    QA_review_link_dict[role] = {}
+    for complexity in QA_review_unique_complexity:
+        role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
+        complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+        QA_review_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+
+QA_review_link_dict["role: front end and backend/DevOps"] = {}     
+for complexity in QA_review_unique_complexity:
+    frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
+    backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
+    complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
+    QA_review_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    
+QA_review_dataset2["Role-based Link for Unknown Status"] = ""
+for role in QA_review_link_dict.keys():
     df = QA_review_dataset2[QA_review_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus1["role: front end"].keys(): #same for all roles
+    for complexity in QA_review_link_dict[list(QA_review_link_dict.keys())[0]].keys(): #same for all roles
         df2 = df[df["Complexity Label"] == complexity]
         indexes = df2.index
-        QA_review_dataset2.loc[indexes, "Role-based Link for Unknown Status 1"] = nesteddict_unknownstatus1[role][complexity]
-        
-QA_review_issues_withstatus_B = final_QA_review2[final_QA_review2["labels.name"].isin(["role: user research", "role: product", "Ready for Prioritization", "Draft", "ready for dev lead"])]["html_url"].unique()
-QA_review_dataset2["Unknown Status 2"] = QA_review_dataset2["html_url"].map(lambda x: 0 if x in QA_review_issues_withstatus_B else 1)
+        QA_review_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = QA_review_link_dict[role][complexity]
 
-QA_review_dataset2["General Link for Unknown Status 2"] = QA_review_dataset2["Complexity Label"].map(lambda x: complexity_link_B[x]) 
-
-QA_review_dataset2["Role-based Link for Unknown Status 2"] = ""
-for role in nesteddict_unknownstatus2.keys():
-    df = QA_review_dataset2[QA_review_dataset2["Role Label"] == role]
-    for complexity in nesteddict_unknownstatus2["role: front end"].keys(): #same for all roles
-        df2 = df[df["Complexity Label"] == complexity]
-        indexes = df2.index
-        QA_review_dataset2.loc[indexes, "Role-based Link for Unknown Status 2"] = nesteddict_unknownstatus2[role][complexity]
+QA_review_dataset2["General Link for Developer Unknown Status"] = ""
 
 
 # ### Combine Data from All Project Board Columns
@@ -1862,7 +1848,7 @@ anomaly_detection_df.drop(columns = ["keep"], inplace = True)
 
 # ### Send Data to Google Sheets
 
-# In[ ]:
+# In[48]:
 
 
 from google.oauth2 import service_account
@@ -1908,15 +1894,24 @@ LabelCheck_worksheet = gs.worksheet(LabelCheck_sheet_name)
 
 LC_spreadsheet_data = LabelCheck_worksheet.get_all_records()
 LC_df = pd.DataFrame.from_dict(LC_spreadsheet_data)
-official_labels = list(LC_df["label_name"].unique())
 
 outdated_labels = list(LC_df[LC_df["in_use?"] == "No"]["label_name"].unique())
+official_labels = list(set(list(LC_df["label_name"].unique())).difference(set(outdated_labels)))
 
-anomaly_detection_df["labels_need_action"] = anomaly_detection_df["labels.name"].map(lambda x: 1 if (x not in official_labels or x in outdated_labels) else 0)
-anomaly_detection_df = anomaly_detection_df.iloc[:, [4,1,2,3,0,5]]
+anomaly_detection_df["labels_need_action"] = anomaly_detection_df["labels.name"].map(lambda x: 1 if x not in official_labels else 0)
+anomaly_detection_df["outdated_label"] = anomaly_detection_df["labels.name"].map(lambda x: 1 if x in outdated_labels else 0)
+anomaly_detection_df["unknown_label"] = anomaly_detection_df["labels.name"].map(lambda x: 1 if (x not in official_labels and x not in outdated_labels) else 0)
+anomaly_detection_df = anomaly_detection_df.iloc[:, [4,1,2,3,0,5,6,7]]
+
+
+# In[49]:
+
 
 anomaly_detection_df2_base = anomaly_detection_df.copy()
 anomaly_detection_df2_base.drop(columns = ["labels_need_action"], inplace = True)
+anomaly_detection_df2_base.drop(columns = ["outdated_label"], inplace = True)
+anomaly_detection_df2_base.drop(columns = ["unknown_label"], inplace = True)
+
 anomaly_detection_df2_base["Complexity Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if (re.search(r"(complexity|good first issue|prework)", str(x).lower())) else 0)
 anomaly_detection_df2_base["Feature Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if (re.search("feature", str(x).lower())) else 0)
 anomaly_detection_df2_base["Role Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if (re.search("role", str(x).lower())) else 0)
@@ -1937,7 +1932,22 @@ anomaly_detection_df2["Size defined label"] = anomaly_detection_df2["Size Label"
 anomaly_detection_df2_join = anomaly_detection_df2_base[anomaly_detection_df2_base["Role Label"] == 1][["html_url", "labels.name"]]
 anomaly_detection_df2 = anomaly_detection_df2.merge(anomaly_detection_df2_join, how = "left", on = ["html_url"])
 
+# change role label of issues with front end and back end labels
+anomaly_detection_wdataset = anomaly_detection_df2[anomaly_detection_df2["labels.name"].str.contains("front end") | anomaly_detection_df2["labels.name"].str.contains("back end")]
+anomaly_detection_wdataset["front/back end count"] = anomaly_detection_wdataset.groupby(["html_url", "title"])["labels.name"].transform("count")
+
+anomaly_detection_df2.loc[list(anomaly_detection_wdataset[anomaly_detection_wdataset["front/back end count"] == 2].index), "labels.name"] = "role: front end and backend/DevOps"
+
+# Drop duplicates that have been created by the change
+anomaly_detection_df2.drop_duplicates(inplace = True)
+
+# Create dataset that detects issues with missing dependencies in icebox
 missing_dependency = anomaly_detection[(anomaly_detection["labels.name"] == "dependency missing") & (anomaly_detection["Project Board Column"] == "1 - Icebox")]
+icebox_issues = list(anomaly_detection[anomaly_detection["Project Board Column"] == "1 - Icebox"]["html_url"].unique())
+icebox_issues_with_dependency = list(anomaly_detection[(anomaly_detection["Project Board Column"] == "1 - Icebox") & (anomaly_detection["labels.name"] == "Dependency")]["html_url"].unique())
+icebox_issues_without_dependency = list(set(icebox_issues).difference(set(icebox_issues_with_dependency)))
+no_dependency = anomaly_detection[anomaly_detection["html_url"].isin(icebox_issues_without_dependency)]
+missing_dependency = pd.concat([missing_dependency, no_dependency], ignore_index = True)
 
 missing_dependency = missing_dependency.iloc[:, [1,4,2,3,0]]
 
@@ -1977,10 +1987,3 @@ sheet_name4 = 'Missing Dependency Issues'
 worksheet4 = gs.worksheet(sheet_name4)
 worksheet4.clear()
 set_with_dataframe(worksheet = worksheet4, dataframe = missing_dependency, include_index = False, include_column_header = True, resize = True)
-
-
-# In[ ]:
-
-
-
-
