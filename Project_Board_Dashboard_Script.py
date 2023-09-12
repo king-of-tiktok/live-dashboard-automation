@@ -1203,9 +1203,9 @@ icebox_dataset2["Unknown Status"] = icebox_dataset2["html_url"].map(lambda x: 0 
 
 # Create nested dictionary for static links
 
-icebox_unique_roles = list(icebox_dataset2["Role Label"].unique())
+icebox_unique_roles = [x for x in icebox_dataset2["Role Label"].unique() if pd.isna(x) == False]
 icebox_unique_roles2 = [x for x in icebox_unique_roles if x != "role: front end and backend/DevOps"]
-icebox_unique_complexity = list(icebox_dataset2["Complexity Label"].unique())
+icebox_unique_complexity = [x for x in icebox_dataset2["Complexity Label"].unique() if pd.isna(x) == False]  
 static_link_1_base = 'https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22ready+for+product%22+-label%3A%22ready+for+design+lead%22+-label%3A%22ready+for+org+rep%22'
 
 
@@ -1292,11 +1292,9 @@ ER_dataset2["Unknown Status"] = ER_dataset2["html_url"].map(lambda x: 0 if x in 
 
 # Create nested dictionary for static links
 
-ER_unique_roles = list(ER_dataset2["Role Label"].unique())
+ER_unique_roles = [x for x in ER_dataset2["Role Label"].unique() if pd.isna(x) == False]
 ER_unique_roles2 = [x for x in ER_unique_roles if x != "role: front end and backend/DevOps"]
-ER_unique_complexity = list(ER_dataset2["Complexity Label"].unique())
-static_link_1_base = 'https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22ready+for+product%22+-label%3A%22ready+for+design+lead%22+-label%3A%22ready+for+org+rep%22'
-
+ER_unique_complexity = [x for x in ER_dataset2["Complexity Label"].unique() if pd.isna(x) == False]
 
 # In[35]:
 
@@ -1373,9 +1371,9 @@ NIA_dataset2["Unknown Status"] = NIA_dataset2["html_url"].map(lambda x: 0 if x i
 
 # Create nested dictionary for static links
 
-NIA_unique_roles = list(NIA_dataset2["Role Label"].unique())
+NIA_unique_roles = [x for x in NIA_dataset2["Role Label"].unique() if pd.isna(x) == False]
 NIA_unique_roles2 = [x for x in NIA_unique_roles if x != "role: front end and backend/DevOps"]
-NIA_unique_complexity = list(NIA_dataset2["Complexity Label"].unique())
+NIA_unique_complexity = [x for x in NIA_dataset2["Complexity Label"].unique() if pd.isna(x) == False]
 
 NIA_link_dict = { }
 
@@ -1440,9 +1438,9 @@ pb_dataset2["Unknown Status"] = pb_dataset2["html_url"].map(lambda x: 0 if x in 
 
 # Create nested dictionary for static links
 
-pb_unique_roles = list(pb_dataset2["Role Label"].unique())
+pb_unique_roles = [x for x in pb_dataset2["Role Label"].unique() if pd.isna(x) == False]
 pb_unique_roles2 = [x for x in pb_unique_roles if x != "role: front end and backend/DevOps"]
-pb_unique_complexity = list(pb_dataset2["Complexity Label"].unique())
+pb_unique_complexity = [x for x in pb_dataset2["Complexity Label"].unique() if pd.isna(x) == False]
 
 pb_link_dict = { }
 
@@ -1508,9 +1506,9 @@ IP_dataset2["Unknown Status"] = IP_dataset2["html_url"].map(lambda x: 0 if x in 
 
 # Create nested dictionary for static links
 
-IP_unique_roles = list(IP_dataset2["Role Label"].unique())
+IP_unique_roles = [x for x in IP_dataset2["Role Label"].unique() if pd.isna(x) == False]
 IP_unique_roles2 = [x for x in IP_unique_roles if x != "role: front end and backend/DevOps"]
-IP_unique_complexity = list(IP_dataset2["Complexity Label"].unique())
+IP_unique_complexity = [x for x in IP_dataset2["Complexity Label"].unique() if pd.isna(x) == False]
 
 IP_link_dict = { }
 
@@ -1578,9 +1576,9 @@ Q_dataset2["Unknown Status"] = Q_dataset2["html_url"].map(lambda x: 0 if x in Q_
 
 # Create nested dictionary for static links
 
-Q_unique_roles = list(Q_dataset2["Role Label"].unique())
+Q_unique_roles = [x for x in Q_dataset2["Role Label"].unique() if pd.isna(x) == False]
 Q_unique_roles2 = [x for x in Q_unique_roles if x != "role: front end and backend/DevOps"]
-Q_unique_complexity = list(Q_dataset2["Complexity Label"].unique())
+Q_unique_complexity = [x for x in Q_dataset2["Complexity Label"].unique() if pd.isna(x) == False]
 
 Q_link_dict = { }
 
@@ -1648,9 +1646,9 @@ QA_dataset2["Unknown Status"] = QA_dataset2["html_url"].map(lambda x: 0 if x in 
 
 # Create nested dictionary for static links
 
-QA_unique_roles = list(QA_dataset2["Role Label"].unique())
+QA_unique_roles = [x for x in QA_dataset2["Role Label"].unique() if pd.isna(x) == False]
 QA_unique_roles2 = [x for x in QA_unique_roles if x != "role: front end and backend/DevOps"]
-QA_unique_complexity = list(QA_dataset2["Complexity Label"].unique())
+QA_unique_complexity = [x for x in QA_dataset2["Complexity Label"].unique() if pd.isna(x) == False]
 
 QA_link_dict = { }
 
@@ -1717,9 +1715,9 @@ UAT_dataset2["Unknown Status"] = UAT_dataset2["html_url"].map(lambda x: 0 if x i
 
 # Create nested dictionary for static links
 
-UAT_unique_roles = list(UAT_dataset2["Role Label"].unique())
+UAT_unique_roles = [x for x in UAT_dataset2["Role Label"].unique() if pd.isna(x) == False]
 UAT_unique_roles2 = [x for x in UAT_unique_roles if x != "role: front end and backend/DevOps"]
-UAT_unique_complexity = list(UAT_dataset2["Complexity Label"].unique())
+UAT_unique_complexity = [x for x in UAT_dataset2["Complexity Label"].unique() if pd.isna(x) == False]
 
 UAT_link_dict = { }
 
@@ -1787,9 +1785,9 @@ QA_review_dataset2["Unknown Status"] = QA_review_dataset2["html_url"].map(lambda
 
 # Create nested dictionary for static links
 
-QA_review_unique_roles = list(QA_review_dataset2["Role Label"].unique())
+QA_review_unique_roles = [x for x in QA_review_dataset2["Role Label"].unique() if pd.isna(x) == False]
 QA_review_unique_roles2 = [x for x in QA_review_unique_roles if x != "role: front end and backend/DevOps"]
-QA_review_unique_complexity = list(QA_review_dataset2["Complexity Label"].unique())
+QA_review_unique_complexity = [x for x in QA_review_dataset2["Complexity Label"].unique() if pd.isna(x) == False]
 
 QA_review_link_dict = { }
 
