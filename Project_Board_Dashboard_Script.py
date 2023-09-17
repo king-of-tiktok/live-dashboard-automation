@@ -314,7 +314,7 @@ extra_breakdown = ["Draft", "2 weeks inactive", "ready for product",
 
 # retain only labels with "role" in it or complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 final_icebox = icebox_issues_df2[(icebox_issues_df2["labels.name"].str.contains("role") | icebox_issues_df2["labels.name"].isin(complexity_labels) | 
-                          icebox_issues_df2["labels.name"].isin(extra_breakdown))]
+                          icebox_issues_df2["labels.name"].isin(extra_breakdown) | icebox_issues_df2["labels.name"].str.contains("Ready", case=False))]
 
 # Make combined label for issues with front and backend labels
 icebox_wdataset = final_icebox[final_icebox["labels.name"].str.contains("front end") | final_icebox["labels.name"].str.contains("back end")]
@@ -420,7 +420,7 @@ ER_issues_df3["Project Board Column"] = "2- ER"
 
 # retain only labels with "role" in it or complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 final_ER = ER_issues_df2[(ER_issues_df2["labels.name"].str.contains("role") | ER_issues_df2["labels.name"].isin(complexity_labels) | 
-                          ER_issues_df2["labels.name"].isin(extra_breakdown))]
+                          ER_issues_df2["labels.name"].isin(extra_breakdown) | ER_issues_df2["labels.name"].str.contains("Ready", case=False))]
 
 # Make combined label for issues with front and backend labels
 ER_wdataset = final_ER[final_ER["labels.name"].str.contains("front end") | final_ER["labels.name"].str.contains("back end")]
@@ -530,7 +530,7 @@ len(NIA_issues_df3)
 
 # retain only labels with "role" in it or complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 final_NIA = NIA_issues_df2[(NIA_issues_df2["labels.name"].str.contains("role") | NIA_issues_df2["labels.name"].isin(complexity_labels) | 
-                          NIA_issues_df2["labels.name"].isin(extra_breakdown))]
+                          NIA_issues_df2["labels.name"].isin(extra_breakdown) | NIA_issues_df2["labels.name"].str.contains("Ready", case=False))]
 
 # Make combined label for issues with front and backend labels
 NIA_wdataset = final_NIA[final_NIA["labels.name"].str.contains("front end") | final_NIA["labels.name"].str.contains("back end")]
@@ -637,7 +637,7 @@ pb_issues_df3["Project Board Column"] = "4 - Prioritized Backlog"
 # retain only labels with "role" in it, complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 
 final_pb = pb_issues_df2[(pb_issues_df2["labels.name"].str.contains("role") | pb_issues_df2["labels.name"].isin(complexity_labels) | 
-                          pb_issues_df2["labels.name"].isin(extra_breakdown))]
+                          pb_issues_df2["labels.name"].isin(extra_breakdown) | pb_issues_df2["labels.name"].str.contains("Ready", case=False))]
 
 # Make combined label for issues with front and backend labels
 pb_wdataset = final_pb[final_pb["labels.name"].str.contains("front end") | final_pb["labels.name"].str.contains("back end")]
@@ -742,7 +742,7 @@ ip_issues_df3["Project Board Column"] = "5 - In Progress"
 
 # retain only labels with "role" in it or complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 final_ip = ip_df2[(ip_df2["labels.name"].str.contains("role") | ip_df2["labels.name"].isin(complexity_labels) | 
-                          ip_df2["labels.name"].isin(extra_breakdown))]
+                          ip_df2["labels.name"].isin(extra_breakdown) | ip_df2["labels.name"].str.contains("Ready", case=False))]
 
 # Make combined label for issues with front and backend labels
 ip_wdataset = final_ip[final_ip["labels.name"].str.contains("front end") | final_ip["labels.name"].str.contains("back end")]
@@ -843,7 +843,7 @@ questions_issues_df3["Project Board Column"] = "6 - Questions/ In Review"
 
 # retain only labels with "role" in it or complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 final_questions = questions_issues_df2[(questions_issues_df2["labels.name"].str.contains("role") | questions_issues_df2["labels.name"].isin(complexity_labels) 
-                                        | questions_issues_df2["labels.name"].isin(extra_breakdown))]
+                                        | questions_issues_df2["labels.name"].isin(extra_breakdown) | questions_issues_df2["labels.name"].str.contains("Ready", case=False))]
 
 # Make combined label for issues with front and backend labels
 questions_wdataset = final_questions[final_questions["labels.name"].str.contains("front end") | final_questions["labels.name"].str.contains("back end")]
@@ -944,7 +944,7 @@ QA_issues_df3["Project Board Column"] = "7 - QA"
 
 # retain only labels with "role" in it or complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 final_QA = QA_issues_df2[(QA_issues_df2["labels.name"].str.contains("role") | QA_issues_df2["labels.name"].isin(complexity_labels) | 
-                          QA_issues_df2["labels.name"].isin(extra_breakdown))]
+                          QA_issues_df2["labels.name"].isin(extra_breakdown) | QA_issues_df2["labels.name"].str.contains("Ready", case=False))]
 
 # Make combined label for issues with front and backend labels
 QA_wdataset = final_QA[final_QA["labels.name"].str.contains("front end") | final_QA["labels.name"].str.contains("back end")]
@@ -1045,7 +1045,7 @@ UAT_issues_df3["Project Board Column"] = "8 - UAT"
 
 # retain only labels with "role" in it or complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 final_UAT = UAT_issues_df2[(UAT_issues_df2["labels.name"].str.contains("role") | UAT_issues_df2["labels.name"].isin(complexity_labels) | 
-                          UAT_issues_df2["labels.name"].isin(extra_breakdown))]
+                          UAT_issues_df2["labels.name"].isin(extra_breakdown) | UAT_issues_df2["labels.name"].str.contains("Ready", case=False))]
 
 # Make combined label for issues with front and backend labels
 UAT_wdataset = final_UAT[final_UAT["labels.name"].str.contains("front end") | final_UAT["labels.name"].str.contains("back end")]
@@ -1146,7 +1146,7 @@ QA_review_issues_df3["Project Board Column"] = "9 - QA (senior review)"
 
 # retain only labels with "role" in it or complexity labels, and "Draft", "ready for product", "ready for prioritization", "ready for dev lead"
 final_QA_review = QA_review_issues_df2[(QA_review_issues_df2["labels.name"].str.contains("role") | QA_review_issues_df2["labels.name"].isin(complexity_labels) | 
-                                        QA_review_issues_df2["labels.name"].isin(extra_breakdown))]
+                                        QA_review_issues_df2["labels.name"].isin(extra_breakdown) | QA_review_issues_df2["labels.name"].str.contains("Ready", case=False))]
 
 # Make combined label for issues with front and backend labels
 QA_review_wdataset = final_QA_review[final_QA_review["labels.name"].str.contains("front end") | final_QA_review["labels.name"].str.contains("back end")]
