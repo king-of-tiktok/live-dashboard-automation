@@ -1244,7 +1244,7 @@ for role in icebox_link_dict.keys():
 # In[31]:
 
 
-icebox_dataset2["General Link for Developer Unknown Status"] = "" 
+# icebox_dataset2["General Link for Developer Unknown Status"] = "" 
 
 
 # In[32]:
@@ -1331,7 +1331,7 @@ for role in ER_link_dict.keys():
 # In[37]:
 
 
-ER_dataset2["General Link for Developer Unknown Status"] = "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22ready+for+product%22+-label%3A%22role%3A+design%22+-label%3A%22role%3A+research+lead%22+-label%3A%22role%3A+writing%22+-label%3A%22ready+for+design+lead%22+-label%3A%22ready+for+org+rep%22+-label%3A%22role%3A+data+analyst%22" 
+# ER_dataset2["General Link for Developer Unknown Status"] = "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22ready+for+product%22+-label%3A%22role%3A+design%22+-label%3A%22role%3A+research+lead%22+-label%3A%22role%3A+writing%22+-label%3A%22ready+for+design+lead%22+-label%3A%22ready+for+org+rep%22+-label%3A%22role%3A+data+analyst%22" 
 
 
 # In[39]:
@@ -1399,7 +1399,7 @@ for role in NIA_link_dict.keys():
         indexes = df2.index
         NIA_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = NIA_link_dict[role][complexity]
 
-NIA_dataset2["General Link for Developer Unknown Status"] = "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22ready+for+product%22+-label%3A%22role%3A+design%22+-label%3A%22role%3A+research+lead%22+-label%3A%22role%3A+writing%22+-label%3A%22ready+for+design+lead%22+-label%3A%22ready+for+org+rep%22+-label%3A%22role%3A+data+analyst%22" 
+# NIA_dataset2["General Link for Developer Unknown Status"] = "https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%22role%3A+user+research%22+-label%3A%22role%3A+product%22+-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22ready+for+product%22+-label%3A%22role%3A+design%22+-label%3A%22role%3A+research+lead%22+-label%3A%22role%3A+writing%22+-label%3A%22ready+for+design+lead%22+-label%3A%22ready+for+org+rep%22+-label%3A%22role%3A+data+analyst%22" 
 
 
 # In[40]:
@@ -1466,7 +1466,7 @@ for role in pb_link_dict.keys():
         indexes = df2.index
         pb_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = pb_link_dict[role][complexity]
 
-pb_dataset2["General Link for Developer Unknown Status"] = ""
+# pb_dataset2["General Link for Developer Unknown Status"] = ""
 
 
 # In[41]:
@@ -1534,7 +1534,7 @@ for role in IP_link_dict.keys():
         indexes = df2.index
         IP_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = IP_link_dict[role][complexity]
 
-IP_dataset2["General Link for Developer Unknown Status"] = ""
+# IP_dataset2["General Link for Developer Unknown Status"] = ""
 
 
 # In[42]:
@@ -1604,7 +1604,7 @@ for role in Q_link_dict.keys():
         indexes = df2.index
         Q_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = Q_link_dict[role][complexity]
 
-Q_dataset2["General Link for Developer Unknown Status"] = ""
+# Q_dataset2["General Link for Developer Unknown Status"] = ""
 
 
 # In[43]:
@@ -1674,7 +1674,7 @@ for role in QA_link_dict.keys():
         indexes = df2.index
         QA_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = QA_link_dict[role][complexity]
 
-QA_dataset2["General Link for Developer Unknown Status"] = ""
+# QA_dataset2["General Link for Developer Unknown Status"] = ""
 
 
 # In[44]:
@@ -1743,7 +1743,7 @@ for role in UAT_link_dict.keys():
         indexes = df2.index
         UAT_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = UAT_link_dict[role][complexity]
 
-UAT_dataset2["General Link for Developer Unknown Status"] = ""
+# UAT_dataset2["General Link for Developer Unknown Status"] = ""
 
 
 # In[45]:
@@ -1813,7 +1813,7 @@ for role in QA_review_link_dict.keys():
         indexes = df2.index
         QA_review_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = QA_review_link_dict[role][complexity]
 
-QA_review_dataset2["General Link for Developer Unknown Status"] = ""
+# QA_review_dataset2["General Link for Developer Unknown Status"] = ""
 
 
 # ### Combine Data from All Project Board Columns
@@ -1929,6 +1929,10 @@ anomaly_detection_df2["Size defined label"] = anomaly_detection_df2["Size Label"
 
 anomaly_detection_df2_join = anomaly_detection_df2_base[anomaly_detection_df2_base["Role Label"] == 1][["html_url", "labels.name"]]
 anomaly_detection_df2 = anomaly_detection_df2.merge(anomaly_detection_df2_join, how = "left", on = ["html_url"])
+epic_issues = list(anomaly_detection[anomaly_detection['labels.name'] == 'epic']['html_url'].unique())
+ER_issues = list(anomaly_detection[anomaly_detection['labels.name'] == 'ER']['html_url'].unique())
+anomaly_detection_df2['Epic Issue?'] = anomaly_detection_df2['html_url'].map(lambda x: 1 if x in epic_issues else 0)
+anomaly_detection_df2['ER Issue?'] = anomaly_detection_df2['html_url'].map(lambda x: 1 if x in ER_issues else 0)
 
 # change role label of issues with front end and back end labels
 anomaly_detection_wdataset = anomaly_detection_df2[anomaly_detection_df2["labels.name"].str.contains("front end") | anomaly_detection_df2["labels.name"].str.contains("back end")]
@@ -1953,6 +1957,14 @@ if len(missing_dependency) == 0:
     missing_dependency.loc[0] = [" "," "," "," "," "]
 else:
     missing_dependency
+
+# Create new table that draws in all issues with ER title that do not have ER label
+
+ER_label_check = ER_issues_df3.copy()
+ER_label_check["ER Label?"] = ER_label_check['html_url'].map(lambda x: 1 if x in ER_issues else 0)
+No_ER_label = ER_label_check[ER_label_check["ER Label?"] == 0]
+No_ER_label.drop(columns = ["ER Label?", "labels.name"], inplace = True)
+No_ER_label.drop_duplicates(inplace = True)
 
 ### Send to Google Sheet
 
@@ -1985,3 +1997,9 @@ sheet_name4 = 'Missing Dependency Issues'
 worksheet4 = gs.worksheet(sheet_name4)
 worksheet4.clear()
 set_with_dataframe(worksheet = worksheet4, dataframe = missing_dependency, include_index = False, include_column_header = True, resize = True)
+
+
+sheet_name5 = 'Missing ER Label'
+worksheet5 = gs.worksheet(sheet_name5)
+worksheet5.clear()
+set_with_dataframe(worksheet = worksheet5, dataframe = No_ER_label, include_index = False, include_column_header = True, resize = True)
