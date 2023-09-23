@@ -1963,8 +1963,32 @@ else:
 ER_label_check = ER_issues_df3.copy()
 ER_label_check["ER Label?"] = ER_label_check['html_url'].map(lambda x: 1 if x in ER_issues else 0)
 No_ER_label = ER_label_check[ER_label_check["ER Label?"] == 0]
-No_ER_label.drop(columns = ["ER Label?", "labels.name"], inplace = True)
-No_ER_label.drop_duplicates(inplace = True)
+No_ER_label_filtered = No_ER_label[~No_ER_label["title"].str.contains("ER from TLDL", case = False)]
+No_ER_label_filtered.drop(columns = ["ER Label?", "labels.name"], inplace = True)
+No_ER_label_filtered.drop_duplicates(inplace = True)
+
+
+# Create a table that displays issues with Complexity: Missing label with first comment being an empty description
+excluded_columns = ["1 - Icebox", "2 - ER", "3 - New Issue Approval"]
+empty_description_search = final_dataset[(~final_dataset["Project Board Column"].isin(excluded_columns)) & (final_dataset["Complexity Label"] == "Complexity: Missing")]
+
+empty_comment = []
+
+for url in empty_description_search["html_url"]:
+    issue_number = re.findall(r'[0-9]+$', url)[0]
+    html = "https://api.github.com/repos/hackforla/website/issues/"+issue_number+"/timeline"
+    response = requests.get(html, auth=(user, GitHub_token))
+    df = pd.DataFrame(response.json())
+    if ("body" not in list(df.columns)):
+        if (df.iloc[0]["actor"]['login'] != 'github-actions[bot]' and df.iloc[0]["event"] == "cross-referenced"):
+            empty_comment.append(url)
+    elif ("body" in list(df.columns)):
+        if (pd.isna(df.iloc[0]["body"]) == True and df.iloc[0]["actor"]['login'] != 'github-actions[bot]' and df.iloc[0]["event"] == "cross-referenced"):
+            empty_comment.append(url)
+    else:
+        continue
+        
+complexity_missing_emptycomment = final_dataset[final_dataset["html_url"].isin(empty_comment)]
 
 ### Send to Google Sheet
 
@@ -1974,12 +1998,12 @@ sheet_name1 = 'Dataset 2'
 
 gs = gc.open_by_key(Main_GOOGLE_SHEETS_ID)
 
+
+# Insert dataframe of issues into Google Sheet
+
 worksheet1 = gs.worksheet(sheet_name1)
 
 worksheet1.clear()
-
-
-# Insert dataframe of issues into Google Sheet
 
 set_with_dataframe(worksheet = worksheet1, dataframe = final_dataset, include_index = False, include_column_header = True, resize = True)
 
@@ -2003,3 +2027,8 @@ sheet_name5 = 'Missing ER Label'
 worksheet5 = gs.worksheet(sheet_name5)
 worksheet5.clear()
 set_with_dataframe(worksheet = worksheet5, dataframe = No_ER_label, include_index = False, include_column_header = True, resize = True)
+
+sheet_name6 = 'Complexity Missing Issues with Empty 1st Comment'
+worksheet6 = gs.worksheet(sheet_name6)
+worksheet6.clear()
+set_with_dataframe(worksheet = worksheet6, dataframe = complexity_missing_emptycomment, include_index = False, include_column_header = True, resize = True)
