@@ -1971,6 +1971,9 @@ No_ER_label_filtered = No_ER_label[~No_ER_label["title"].str.contains("ER from T
 No_ER_label_filtered.drop(columns = ["ER Label?", "labels.name"], inplace = True)
 No_ER_label_filtered.drop_duplicates(inplace = True)
 
+if len(No_ER_label_filtered) == 0:
+    No_ER_label_filtered = pd.DataFrame(data = [" "," "," "," "," "," "], columns = ["labels.name", "Runtime", "html_url", "title", "Project Board Column", "ER Label?"])
+
 
 # Create a table that displays issues with Complexity: Missing label with first comment being an empty description
 excluded_columns = ["1 - Icebox", "2 - ER", "3 - New Issue Approval"]
@@ -2033,7 +2036,7 @@ set_with_dataframe(worksheet = worksheet4, dataframe = missing_dependency, inclu
 sheet_name5 = 'Missing ER Label'
 worksheet5 = gs.worksheet(sheet_name5)
 worksheet5.clear()
-set_with_dataframe(worksheet = worksheet5, dataframe = No_ER_label, include_index = False, include_column_header = True, resize = True)
+set_with_dataframe(worksheet = worksheet5, dataframe = No_ER_label_filtered, include_index = False, include_column_header = True, resize = True)
 
 sheet_name6 = 'Complexity Missing Issues with Empty 1st Comment'
 worksheet6 = gs.worksheet(sheet_name6)
