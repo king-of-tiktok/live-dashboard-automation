@@ -1991,8 +1991,11 @@ for url in empty_description_search["html_url"]:
             empty_comment.append(url)
     else:
         continue
-        
-complexity_missing_emptycomment = final_dataset[final_dataset["html_url"].isin(empty_comment)]
+
+if len(empty_comment) == 0:
+    complexity_missing_emptycomment = pd.DataFrame(data = [" "," "," "," "," "," "," "," "," "," "," "," "," "], columns = final_dataset.columns)
+else:
+    complexity_missing_emptycomment = final_dataset[final_dataset["html_url"].isin(empty_comment)]
 
 ### Send to Google Sheet
 
