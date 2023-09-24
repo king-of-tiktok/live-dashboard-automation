@@ -1972,8 +1972,8 @@ No_ER_label_filtered.drop(columns = ["ER Label?", "labels.name"], inplace = True
 No_ER_label_filtered.drop_duplicates(inplace = True)
 
 if len(No_ER_label_filtered) == 0:
-    No_ER_label_filtered = pd.DataFrame(data = [" "," "," "," "," "," "], columns = ["labels.name", "Runtime", "html_url", "title", "Project Board Column", "ER Label?"])
-
+    No_ER_label_filtered = pd.DataFrame(columns = ["labels.name", "Runtime", "html_url", "title", "Project Board Column", "ER Label?"])
+    No_ER_label_filtered.loc[0] = [" "," "," "," "," "," "]
 
 # Create a table that displays issues with Complexity: Missing label with first comment being an empty description
 excluded_columns = ["1 - Icebox", "2 - ER", "3 - New Issue Approval"]
@@ -1996,7 +1996,9 @@ for url in empty_description_search["html_url"]:
         continue
 
 if len(empty_comment) == 0:
-    complexity_missing_emptycomment = pd.DataFrame(data = [" "," "," "," "," "," "," "," "," "," "," "," "," "], columns = final_dataset.columns)
+    complexity_missing_emptycomment = pd.DataFrame(columns = final_dataset.columns)
+    complexity_missing_emptycomment.loc[0] = [" "," "," "," "," "," "," "," "," "," "," "," "," "]
+
 else:
     complexity_missing_emptycomment = final_dataset[final_dataset["html_url"].isin(empty_comment)]
 
