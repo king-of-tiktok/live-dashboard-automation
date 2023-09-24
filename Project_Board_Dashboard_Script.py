@@ -1136,7 +1136,7 @@ QA_review_difference = list(set(QA_review_issues_df["html_url"]).difference(set(
 QA_review_no_labels = list(set(QA_review_difference).difference(set(remove)))
 QA_review_no_labels_df = QA_review_issues_df[QA_review_issues_df["html_url"].isin(QA_review_no_labels)][["Runtime", "html_url", "title"]]
 QA_review_no_labels_df["labels.name"] = ""
-QA_review_no_labels_df = QA_review_no_labels_df.iloc[["labels.name", "Runtime", "html_url", "title"]]
+QA_review_no_labels_df = QA_review_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
 # CHANGES MADE HERE!!!!!
 QA_review_issues_df3 = pd.concat([QA_review_issues_df2, QA_review_no_labels_df], ignore_index = True)
