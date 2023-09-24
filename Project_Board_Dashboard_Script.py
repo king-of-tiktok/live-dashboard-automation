@@ -280,7 +280,7 @@ icebox_difference = list(set(icebox_issues_df["html_url"]).difference(set(icebox
 icebox_no_labels = list(set(icebox_difference).difference(set(remove)))
 icebox_no_labels_df = icebox_issues_df[icebox_issues_df["html_url"].isin(icebox_no_labels)][["Runtime", "html_url", "title"]]
 icebox_no_labels_df["labels.name"] = ""
-icebox_no_labels_df = icebox_no_labels_df.iloc[:, [3,0,1,2]]
+icebox_no_labels_df = icebox_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
 icebox_issues_df3 = pd.concat([icebox_issues_df2, icebox_no_labels_df], ignore_index = True)
 
@@ -410,7 +410,7 @@ ER_difference = list(set(ER_issues_df["html_url"]).difference(set(ER_issues_df2[
 ER_no_labels = list(set(ER_difference).difference(set(remove)))
 ER_no_labels_df = ER_issues_df[ER_issues_df["html_url"].isin(ER_no_labels)][["Runtime", "html_url", "title"]]
 ER_no_labels_df["labels.name"] = ""
-ER_no_labels_df = ER_no_labels_df.iloc[:, [3,0,1,2]]
+ER_no_labels_df = ER_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
 # CHANGES MADE HERE!!!!!
 ER_issues_df3 = pd.concat([ER_issues_df2, ER_no_labels_df], ignore_index = True)
@@ -519,7 +519,7 @@ NIA_difference = list(set(NIA_issues_df["html_url"]).difference(set(NIA_issues_d
 NIA_no_labels = list(set(NIA_difference).difference(set(remove)))
 NIA_no_labels_df = NIA_issues_df[NIA_issues_df["html_url"].isin(NIA_no_labels)][["Runtime", "html_url", "title"]]
 NIA_no_labels_df["labels.name"] = ""
-NIA_no_labels_df = NIA_no_labels_df.iloc[:, [3,0,1,2]]
+NIA_no_labels_df = NIA_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
 # CHANGES MADE HERE!!!!!
 NIA_issues_df3 = pd.concat([NIA_issues_df2, NIA_no_labels_df], ignore_index = True)
@@ -626,7 +626,7 @@ pb_difference = list(set(pb_issues_df["html_url"]).difference(set(pb_issues_df2[
 pb_no_labels = list(set(pb_difference).difference(set(remove)))
 pb_no_labels_df = pb_issues_df[pb_issues_df["html_url"].isin(pb_no_labels)][["Runtime", "html_url", "title"]]
 pb_no_labels_df["labels.name"] = ""
-pb_no_labels_df = pb_no_labels_df.iloc[:, [3,0,1,2]]
+pb_no_labels_df = pb_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
 # CHANGES MADE HERE!!!!!
 pb_issues_df3 = pd.concat([pb_issues_df2, pb_no_labels_df], ignore_index = False)
@@ -732,7 +732,7 @@ ip_difference = list(set(ip_df["html_url"]).difference(set(ip_df2["html_url"])))
 ip_no_labels = list(set(ip_difference).difference(set(remove)))
 ip_no_labels_df = ip_df[ip_df["html_url"].isin(ip_no_labels)][["Runtime", "html_url", "title"]]
 ip_no_labels_df["labels.name"] = ""
-ip_no_labels_df = ip_no_labels_df.iloc[:, [3,0,1,2]]
+ip_no_labels_df = ip_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
 # CHANGES MADE HERE!!!!!
 ip_issues_df3 = pd.concat([ip_df2, ip_no_labels_df], ignore_index = True)
@@ -833,7 +833,7 @@ questions_difference = list(set(questions_issues_df["html_url"]).difference(set(
 questions_no_labels = list(set(questions_difference).difference(set(remove)))
 questions_no_labels_df = questions_issues_df[questions_issues_df["html_url"].isin(questions_no_labels)][["Runtime", "html_url", "title"]]
 questions_no_labels_df["labels.name"] = ""
-questions_no_labels_df = questions_no_labels_df.iloc[:, [3,0,1,2]]
+questions_no_labels_df = questions_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
 # CHANGES MADE HERE!!!!!
 questions_issues_df3 = pd.concat([questions_issues_df2, questions_no_labels_df], ignore_index = True)
@@ -934,7 +934,7 @@ QA_difference = list(set(QA_issues_df["html_url"]).difference(set(QA_issues_df2[
 QA_no_labels = list(set(QA_difference).difference(set(remove)))
 QA_no_labels_df = QA_issues_df[QA_issues_df["html_url"].isin(QA_no_labels)][["Runtime", "html_url", "title"]]
 QA_no_labels_df["labels.name"] = ""
-QA_no_labels_df = QA_no_labels_df.iloc[:, [3,0,1,2]]
+QA_no_labels_df = QA_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
 # CHANGES MADE HERE!!!!!
 QA_issues_df3 = pd.concat([QA_issues_df2, QA_no_labels_df], ignore_index = True)
@@ -1035,7 +1035,7 @@ UAT_difference = list(set(UAT_issues_df["html_url"]).difference(set(UAT_issues_d
 UAT_no_labels = list(set(UAT_difference).difference(set(remove)))
 UAT_no_labels_df = UAT_issues_df[UAT_issues_df["html_url"].isin(UAT_no_labels)][["Runtime", "html_url", "title"]]
 UAT_no_labels_df["labels.name"] = ""
-UAT_no_labels_df = UAT_no_labels_df.iloc[:, [3,0,1,2]]
+UAT_no_labels_df = UAT_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
 # CHANGES MADE HERE!!!!!
 UAT_issues_df3 = pd.concat([UAT_issues_df2, UAT_no_labels_df], ignore_index = True)
@@ -1136,7 +1136,7 @@ QA_review_difference = list(set(QA_review_issues_df["html_url"]).difference(set(
 QA_review_no_labels = list(set(QA_review_difference).difference(set(remove)))
 QA_review_no_labels_df = QA_review_issues_df[QA_review_issues_df["html_url"].isin(QA_review_no_labels)][["Runtime", "html_url", "title"]]
 QA_review_no_labels_df["labels.name"] = ""
-QA_review_no_labels_df = QA_review_no_labels_df.iloc[:, [3,0,1,2]]
+QA_review_no_labels_df = QA_review_no_labels_df.iloc[["labels.name", "Runtime", "html_url", "title"]]
 
 # CHANGES MADE HERE!!!!!
 QA_review_issues_df3 = pd.concat([QA_review_issues_df2, QA_review_no_labels_df], ignore_index = True)
@@ -1185,7 +1185,7 @@ for label in extra_breakdown:
         
 icebox_dataset["Project Board Column"] = "1 - Icebox"
 
-icebox_dataset2 = icebox_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
+icebox_dataset2 = icebox_dataset[["Project Board Column", "Runtime", "Role Label", "Complexity Label", "html_url", "title", "Draft", "2 weeks inactive", "ready for product", "ready for dev lead", "Ready for Prioritization"]]
 
 
 # In[27]:
@@ -1274,7 +1274,7 @@ for label in extra_breakdown:
 ER_dataset["Project Board Column"] = "2 - ER"
 
 # reoder the columns
-ER_dataset2 = ER_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
+ER_dataset2 = ER_dataset[["Project Board Column", "Runtime", "Role Label", "Complexity Label", "html_url", "title", "Draft", "2 weeks inactive", "ready for product", "ready for dev lead", "Ready for Prioritization"]]
 
 
 # In[33]:
@@ -1361,7 +1361,7 @@ for label in extra_breakdown:
 
 NIA_dataset["Project Board Column"] = "3 - New Issue Approval"
 
-NIA_dataset2 = NIA_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
+NIA_dataset2 = NIA_dataset[["Project Board Column", "Runtime", "Role Label", "Complexity Label", "html_url", "title", "Draft", "2 weeks inactive", "ready for product", "ready for dev lead", "Ready for Prioritization"]]
 
 # Create a column to identify issues with unknown status
 NIA_unknown_status_wdataset = final_NIA2.copy()
@@ -1428,7 +1428,7 @@ for label in extra_breakdown:
         
 pb_dataset["Project Board Column"] = "4 - Prioritized Backlog"
 
-pb_dataset2 = pb_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
+pb_dataset2 = pb_dataset[["Project Board Column", "Runtime", "Role Label", "Complexity Label", "html_url", "title", "Draft", "2 weeks inactive", "ready for product", "ready for dev lead", "Ready for Prioritization"]]
 
 # Create a column to identify issues with unknown status
 pb_unknown_status_wdataset = final_pb2.copy()
@@ -1496,7 +1496,7 @@ for label in extra_breakdown:
 IP_dataset["Project Board Column"] = "5 - In Progress"
 
 # reoder the columns
-IP_dataset2 = IP_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
+IP_dataset2 = IP_dataset[["Project Board Column", "Runtime", "Role Label", "Complexity Label", "html_url", "title", "Draft", "2 weeks inactive", "ready for product", "ready for dev lead", "Ready for Prioritization"]]
 
 # Create a column to identify issues with unknown status
 IP_unknown_status_wdataset = final_ip2.copy()
@@ -1564,7 +1564,7 @@ for label in extra_breakdown:
 Q_dataset["Project Board Column"] = "6 - Questions/ In Review"
 
 # reoder the columns
-Q_dataset2 = Q_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
+Q_dataset2 = Q_dataset[["Project Board Column", "Runtime", "Role Label", "Complexity Label", "html_url", "title", "Draft", "2 weeks inactive", "ready for product", "ready for dev lead", "Ready for Prioritization"]]
 
 # Add in unknown status columns
 
@@ -1634,7 +1634,7 @@ for label in extra_breakdown:
 QA_dataset["Project Board Column"] = "7 - QA"
 
 # reoder the columns
-QA_dataset2 = QA_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
+QA_dataset2 = QA_dataset[["Project Board Column", "Runtime", "Role Label", "Complexity Label", "html_url", "title", "Draft", "2 weeks inactive", "ready for product", "ready for dev lead", "Ready for Prioritization"]]
 
 # Add in unknown status columns
 
@@ -1703,7 +1703,7 @@ for label in extra_breakdown:
 
 UAT_dataset["Project Board Column"] = "8 - UAT"
 
-UAT_dataset2 = UAT_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
+UAT_dataset2 = UAT_dataset[["Project Board Column", "Runtime", "Role Label", "Complexity Label", "html_url", "title", "Draft", "2 weeks inactive", "ready for product", "ready for dev lead", "Ready for Prioritization"]]
 
 # Add in unknown status columns
 
@@ -1772,7 +1772,7 @@ for label in extra_breakdown:
 
 QA_review_dataset["Project Board Column"] = "9 - QA (senior review)"
 
-QA_review_dataset2 = QA_review_dataset.iloc[:, [10,0,1,4,2,3,5,6,7,8,9]]
+QA_review_dataset2 = QA_review_dataset[["Project Board Column", "Runtime", "Role Label", "Complexity Label", "html_url", "title", "Draft", "2 weeks inactive", "ready for product", "ready for dev lead", "Ready for Prioritization"]]
 
 # Add in unknown status columns
 
@@ -1899,16 +1899,20 @@ official_labels = list(set(list(LC_df["label_name"].unique())).difference(set(ou
 anomaly_detection_df["labels_need_action"] = anomaly_detection_df["labels.name"].map(lambda x: 1 if x not in official_labels else 0)
 anomaly_detection_df["outdated_label"] = anomaly_detection_df["labels.name"].map(lambda x: 1 if x in outdated_labels else 0)
 anomaly_detection_df["unknown_label"] = anomaly_detection_df["labels.name"].map(lambda x: 1 if (x not in official_labels and x not in outdated_labels) else 0)
-anomaly_detection_df = anomaly_detection_df.iloc[:, [4,1,2,3,0,5,6,7]]
+anomaly_detection_df["Label Transformed"] = anomaly_detection_df["labels.name"].map(lambda x: x.lower().replace(":", "%3A").replace(" ", "+") if pd.isna(x) == False else x)
+anomaly_detection_df["Link for Quick Correction"] = anomaly_detection_df["Label Transformed"].map(lambda x: "https://github.com/hackforla/website/issues?q=is%3Aopen+is%3Aissue+label%3A"+str(x) if pd.isna(x) == False else np.nan)
 
+anomaly_detection_df.drop(columns = ["Label Transformed"], inplace = True)
+
+anomaly_detection_df = anomaly_detection_df[["Project Board Column", "Runtime", "html_url", "title", "labels.name", "labels_need_action", "outdated_label", "unknown_label", "Link for Quick Correction"]]
 
 # In[49]:
-
 
 anomaly_detection_df2_base = anomaly_detection_df.copy()
 anomaly_detection_df2_base.drop(columns = ["labels_need_action"], inplace = True)
 anomaly_detection_df2_base.drop(columns = ["outdated_label"], inplace = True)
 anomaly_detection_df2_base.drop(columns = ["unknown_label"], inplace = True)
+anomaly_detection_df2_base.drop(columns = ["Link for Quick Correction"], inplace = True)
 
 anomaly_detection_df2_base["Complexity Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if (re.search(r"(complexity|good first issue|prework)", str(x).lower())) else 0)
 anomaly_detection_df2_base["Feature Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if (re.search("feature", str(x).lower())) else 0)
