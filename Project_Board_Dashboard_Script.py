@@ -1192,11 +1192,10 @@ icebox_dataset2 = icebox_dataset[["Project Board Column", "Runtime", "Role Label
 
 
 # Create a column to identify issues with unknown status
-icebox_unknown_status_wdataset = final_icebox2.copy()
-icebox_unknown_status_wdataset["Known Status"] = icebox_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
+icebox_unknown_status_wdataset = icebox_issues_df2.copy()
+icebox_unknown_status_wdataset["Known Status"] = icebox_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft|^dependency$)", str(x).lower())) else 0)
 icebox_known_status_issues = list(icebox_unknown_status_wdataset[icebox_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
 icebox_dataset2["Unknown Status"] = icebox_dataset2["html_url"].map(lambda x: 0 if x in icebox_known_status_issues else 1) 
-
 
 # In[28]:
 
@@ -1281,7 +1280,7 @@ ER_dataset2 = ER_dataset[["Project Board Column", "Runtime", "Role Label", "Comp
 
 
 # Create a column to identify issues with unknown status
-ER_unknown_status_wdataset = final_ER2.copy()
+ER_unknown_status_wdataset = ER_issues_df2.copy()
 ER_unknown_status_wdataset["Known Status"] = ER_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
 ER_known_status_issues = list(ER_unknown_status_wdataset[ER_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
 ER_dataset2["Unknown Status"] = ER_dataset2["html_url"].map(lambda x: 0 if x in ER_known_status_issues else 1) 
@@ -1364,7 +1363,7 @@ NIA_dataset["Project Board Column"] = "3 - New Issue Approval"
 NIA_dataset2 = NIA_dataset[["Project Board Column", "Runtime", "Role Label", "Complexity Label", "html_url", "title", "Draft", "2 weeks inactive", "ready for product", "ready for dev lead", "Ready for Prioritization"]]
 
 # Create a column to identify issues with unknown status
-NIA_unknown_status_wdataset = final_NIA2.copy()
+NIA_unknown_status_wdataset = NIA_issues_df2.copy()
 NIA_unknown_status_wdataset["Known Status"] = NIA_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
 NIA_known_status_issues = list(NIA_unknown_status_wdataset[NIA_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
 NIA_dataset2["Unknown Status"] = NIA_dataset2["html_url"].map(lambda x: 0 if x in NIA_known_status_issues else 1) 
@@ -1431,7 +1430,7 @@ pb_dataset["Project Board Column"] = "4 - Prioritized Backlog"
 pb_dataset2 = pb_dataset[["Project Board Column", "Runtime", "Role Label", "Complexity Label", "html_url", "title", "Draft", "2 weeks inactive", "ready for product", "ready for dev lead", "Ready for Prioritization"]]
 
 # Create a column to identify issues with unknown status
-pb_unknown_status_wdataset = final_pb2.copy()
+pb_unknown_status_wdataset = pb_issues_df2.copy()
 pb_unknown_status_wdataset["Known Status"] = pb_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
 pb_known_status_issues = list(pb_unknown_status_wdataset[pb_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
 pb_dataset2["Unknown Status"] = pb_dataset2["html_url"].map(lambda x: 0 if x in pb_known_status_issues else 1) 
@@ -1499,7 +1498,7 @@ IP_dataset["Project Board Column"] = "5 - In Progress"
 IP_dataset2 = IP_dataset[["Project Board Column", "Runtime", "Role Label", "Complexity Label", "html_url", "title", "Draft", "2 weeks inactive", "ready for product", "ready for dev lead", "Ready for Prioritization"]]
 
 # Create a column to identify issues with unknown status
-IP_unknown_status_wdataset = final_ip2.copy()
+IP_unknown_status_wdataset = ip_df2.copy()
 IP_unknown_status_wdataset["Known Status"] = IP_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
 IP_known_status_issues = list(IP_unknown_status_wdataset[IP_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
 IP_dataset2["Unknown Status"] = IP_dataset2["html_url"].map(lambda x: 0 if x in IP_known_status_issues else 1) 
@@ -1569,7 +1568,7 @@ Q_dataset2 = Q_dataset[["Project Board Column", "Runtime", "Role Label", "Comple
 # Add in unknown status columns
 
 # Create a column to identify issues with unknown status
-Q_unknown_status_wdataset = final_questions2.copy()
+Q_unknown_status_wdataset = questions_issues_df2.copy()
 Q_unknown_status_wdataset["Known Status"] = Q_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
 Q_known_status_issues = list(Q_unknown_status_wdataset[Q_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
 Q_dataset2["Unknown Status"] = Q_dataset2["html_url"].map(lambda x: 0 if x in Q_known_status_issues else 1) 
@@ -1639,7 +1638,7 @@ QA_dataset2 = QA_dataset[["Project Board Column", "Runtime", "Role Label", "Comp
 # Add in unknown status columns
 
 # Create a column to identify issues with unknown status
-QA_unknown_status_wdataset = final_QA2.copy()
+QA_unknown_status_wdataset = QA_issues_df2.copy()
 QA_unknown_status_wdataset["Known Status"] = QA_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
 QA_known_status_issues = list(QA_unknown_status_wdataset[QA_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
 QA_dataset2["Unknown Status"] = QA_dataset2["html_url"].map(lambda x: 0 if x in QA_known_status_issues else 1) 
@@ -1708,7 +1707,7 @@ UAT_dataset2 = UAT_dataset[["Project Board Column", "Runtime", "Role Label", "Co
 # Add in unknown status columns
 
 # Create a column to identify issues with unknown status
-UAT_unknown_status_wdataset = final_UAT2.copy()
+UAT_unknown_status_wdataset = UAT_issues_df2.copy()
 UAT_unknown_status_wdataset["Known Status"] = UAT_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
 UAT_known_status_issues = list(UAT_unknown_status_wdataset[UAT_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
 UAT_dataset2["Unknown Status"] = UAT_dataset2["html_url"].map(lambda x: 0 if x in UAT_known_status_issues else 1) 
@@ -1778,7 +1777,7 @@ QA_review_dataset2 = QA_review_dataset[["Project Board Column", "Runtime", "Role
 
 
 # Create a column to identify issues with unknown status
-QA_review_unknown_status_wdataset = final_QA_review2.copy()
+QA_review_unknown_status_wdataset = QA_review_issues_df2.copy()
 QA_review_unknown_status_wdataset["Known Status"] = QA_review_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
 QA_review_known_status_issues = list(QA_review_unknown_status_wdataset[QA_review_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
 QA_review_dataset2["Unknown Status"] = QA_review_dataset2["html_url"].map(lambda x: 0 if x in QA_review_known_status_issues else 1) 
@@ -1948,7 +1947,8 @@ anomaly_detection_df2.loc[list(anomaly_detection_wdataset[anomaly_detection_wdat
 anomaly_detection_df2.drop_duplicates(inplace = True)
 
 # Create dataset that detects issues with missing dependencies in icebox
-missing_dependency = anomaly_detection[(anomaly_detection["labels.name"] == "dependency missing") & (anomaly_detection["Project Board Column"] == "1 - Icebox")]
+missing_dependency_label = list(LC_df[(LC_df["label_series"] == "dependency") & (LC_df["missing_series?"] == "Yes")]["label_name"])[0]
+missing_dependency = anomaly_detection[(anomaly_detection["labels.name"] == missing_dependency_label) & (anomaly_detection["Project Board Column"] == "1 - Icebox")]
 icebox_issues = list(anomaly_detection[anomaly_detection["Project Board Column"] == "1 - Icebox"]["html_url"].unique())
 icebox_issues_with_dependency = list(anomaly_detection[(anomaly_detection["Project Board Column"] == "1 - Icebox") & (anomaly_detection["labels.name"] == "Dependency")]["html_url"].unique())
 icebox_issues_without_dependency = list(set(icebox_issues).difference(set(icebox_issues_with_dependency)))
@@ -1962,18 +1962,33 @@ if len(missing_dependency) == 0:
 else:
     missing_dependency
 
+# Create dataset with issues that have labels in missing series (to be joined for anomaly report in Looker)
+missingseries_labels = list(LC_df[LC_df["missing_series?"] == "Yes"]["label_name"])
+issues_w_missinglabels = anomaly_detection[anomaly_detection['labels.name'].isin(missingseries_labels)][["Project Board Column", "html_url", "title", "labels.name"]]
+
 # Create new table that draws in all issues with ER title that do not have ER label
 
 ER_label_check = ER_issues_df3.copy()
 ER_label_check["ER Label?"] = ER_label_check['html_url'].map(lambda x: 1 if x in ER_issues else 0)
 No_ER_label = ER_label_check[ER_label_check["ER Label?"] == 0]
 No_ER_label_filtered = No_ER_label[~No_ER_label["title"].str.contains("ER from TLDL", case = False)]
-No_ER_label_filtered.drop(columns = ["ER Label?", "labels.name"], inplace = True)
+No_ER_label_filtered.drop(columns = ["labels.name"], inplace = True)
 No_ER_label_filtered.drop_duplicates(inplace = True)
 
 if len(No_ER_label_filtered) == 0:
-    No_ER_label_filtered = pd.DataFrame(columns = ["labels.name", "Runtime", "html_url", "title", "Project Board Column", "ER Label?"])
+    No_ER_label_filtered = pd.DataFrame(columns = ["Runtime", "html_url", "title", "Project Board Column", "ER Label?", "state"])
     No_ER_label_filtered.loc[0] = [" "," "," "," "," "," "]
+else:
+    no_ERlabel_issuestate = pd.DataFrame()
+
+    for url in No_ER_label_filtered["html_url"]:
+        issue_number = re.findall(r'[0-9]+$', url)[0]
+        html = "https://api.github.com/repos/hackforla/website/issues/"+issue_number
+        response = requests.get(html, auth=(user, GitHub_token))
+        df = pd.json_normalize(response.json())[["html_url", "state"]]
+        no_ERlabel_issuestate = pd.concat([no_ERlabel_issuestate, df], ignore_index = True)
+
+    No_ER_label_filtered = No_ER_label_filtered.merge(no_ERlabel_issuestate, how = "left", on = "html_url")
 
 # Create a table that displays issues with Complexity: Missing label with first comment being an empty description
 excluded_columns = ["1 - Icebox", "2 - ER", "3 - New Issue Approval"]
@@ -1995,12 +2010,11 @@ for url in empty_description_search["html_url"]:
     else:
         continue
 
-if len(empty_comment) == 0:
-    complexity_missing_emptycomment = pd.DataFrame(columns = final_dataset.columns)
-    complexity_missing_emptycomment.loc[0] = [" "," "," "," "," "," "," "," "," "," "," "," "," "]
-
+complexity_missing_emptycomment = final_dataset[final_dataset["html_url"].isin(empty_comment)][["Project Board Column", "Role Label", "Complexity Label", "html_url", "title"]]
+if len(complexity_missing_emptycomment) == 0:
+    complexity_missing_emptycomment.loc[0] = [" "," "," "," "," "]
 else:
-    complexity_missing_emptycomment = final_dataset[final_dataset["html_url"].isin(empty_comment)]
+    complexity_missing_emptycomment
 
 ### Send to Google Sheet
 
@@ -2010,12 +2024,11 @@ sheet_name1 = 'Dataset 2'
 
 gs = gc.open_by_key(Main_GOOGLE_SHEETS_ID)
 
-
-# Insert dataframe of issues into Google Sheet
-
 worksheet1 = gs.worksheet(sheet_name1)
 
 worksheet1.clear()
+
+# Insert dataframe of issues into Google Sheet
 
 set_with_dataframe(worksheet = worksheet1, dataframe = final_dataset, include_index = False, include_column_header = True, resize = True)
 
@@ -2029,18 +2042,22 @@ worksheet3 = gs.worksheet(sheet_name3)
 worksheet3.clear()
 set_with_dataframe(worksheet = worksheet3, dataframe = anomaly_detection_df2, include_index = False, include_column_header = True, resize = True)
 
-sheet_name4 = 'Missing Dependency Issues'
+sheet_name4 = 'Issues with Missing Series Labels'
 worksheet4 = gs.worksheet(sheet_name4)
 worksheet4.clear()
-set_with_dataframe(worksheet = worksheet4, dataframe = missing_dependency, include_index = False, include_column_header = True, resize = True)
+set_with_dataframe(worksheet = worksheet4, dataframe = issues_w_missinglabels, include_index = False, include_column_header = True, resize = True)
 
-
-sheet_name5 = 'Missing ER Label'
+sheet_name5 = 'Icebox Issues with Missing or No Dependency'
 worksheet5 = gs.worksheet(sheet_name5)
 worksheet5.clear()
-set_with_dataframe(worksheet = worksheet5, dataframe = No_ER_label_filtered, include_index = False, include_column_header = True, resize = True)
+set_with_dataframe(worksheet = worksheet5, dataframe = missing_dependency, include_index = False, include_column_header = True, resize = True)
 
-sheet_name6 = 'Complexity Missing Issues with Empty 1st Comment'
+sheet_name6 = 'Missing ER Label'
 worksheet6 = gs.worksheet(sheet_name6)
 worksheet6.clear()
-set_with_dataframe(worksheet = worksheet6, dataframe = complexity_missing_emptycomment, include_index = False, include_column_header = True, resize = True)
+set_with_dataframe(worksheet = worksheet6, dataframe = No_ER_label_filtered, include_index = False, include_column_header = True, resize = True)
+
+sheet_name7 = 'Complexity Missing Issues with Empty 1st Comment'
+worksheet7 = gs.worksheet(sheet_name7)
+worksheet7.clear()
+set_with_dataframe(worksheet = worksheet7, dataframe = complexity_missing_emptycomment, include_index = False, include_column_header = True, resize = True)
