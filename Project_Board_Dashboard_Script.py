@@ -1205,8 +1205,7 @@ icebox_dataset2["Unknown Status"] = icebox_dataset2["html_url"].map(lambda x: 0 
 icebox_unique_roles = [x for x in icebox_dataset2["Role Label"].unique() if pd.isna(x) == False]
 icebox_unique_roles2 = [x for x in icebox_unique_roles if x != "role: front end and backend/DevOps"]
 icebox_unique_complexity = [x for x in icebox_dataset2["Complexity Label"].unique() if pd.isna(x) == False]  
-static_link_1_base = 'https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22ready+for+product%22+-label%3A%22ready+for+design+lead%22+-label%3A%22ready+for+org+rep%22'
-
+static_link_1_base_icebox = 'https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22ready+for+product%22+-label%3A%22ready+for+design+lead%22+-label%3A%22ready+for+org+rep%22+-label%3A%22dependency%22'
 
 # In[29]:
 
@@ -1218,14 +1217,14 @@ for role in icebox_unique_roles:
     for complexity in icebox_unique_complexity:
         role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
         complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-        icebox_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+        icebox_link_dict[role][complexity] = static_link_1_base_icebox+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
 
 icebox_link_dict["role: front end and backend/DevOps"] = {}     
 for complexity in icebox_unique_complexity:
     frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
     backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
     complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-    icebox_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    icebox_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base_icebox+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
 
 
 # In[30]:
@@ -1280,6 +1279,7 @@ ER_dataset2 = ER_dataset[["Project Board Column", "Runtime", "Role Label", "Comp
 
 
 # Create a column to identify issues with unknown status
+static_link_1_base = 'https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22ready+for+product%22+-label%3A%22ready+for+design+lead%22+-label%3A%22ready+for+org+rep%22'
 ER_unknown_status_wdataset = ER_issues_df2.copy()
 ER_unknown_status_wdataset["Known Status"] = ER_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
 ER_known_status_issues = list(ER_unknown_status_wdataset[ER_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
@@ -1893,13 +1893,13 @@ LC_spreadsheet_data = LabelCheck_worksheet.get_all_records()
 LC_df = pd.DataFrame.from_dict(LC_spreadsheet_data)
 
 outdated_labels = list(LC_df[LC_df["in_use?"] == "No"]["label_name"].unique())
-official_labels = list(set(list(LC_df["label_name"].unique())).difference(set(outdated_labels)))
+official_active_labels = list(set(list(LC_df["label_name"])).difference(set(outdated_labels)))
 
-anomaly_detection_df["labels_need_action"] = anomaly_detection_df["labels.name"].map(lambda x: 1 if x not in official_labels else 0)
+anomaly_detection_df["labels_need_action"] = anomaly_detection_df["labels.name"].map(lambda x: 1 if x not in official_active_labels else 0)
 anomaly_detection_df["outdated_label"] = anomaly_detection_df["labels.name"].map(lambda x: 1 if x in outdated_labels else 0)
-anomaly_detection_df["unknown_label"] = anomaly_detection_df["labels.name"].map(lambda x: 1 if (x not in official_labels and x not in outdated_labels) else 0)
+anomaly_detection_df["unknown_label"] = anomaly_detection_df["labels.name"].map(lambda x: 1 if (x not in official_active_labels and x not in outdated_labels) else 0)
 anomaly_detection_df["Label Transformed"] = anomaly_detection_df["labels.name"].map(lambda x: x.lower().replace(":", "%3A").replace(" ", "+") if pd.isna(x) == False else x)
-anomaly_detection_df["Link for Quick Correction"] = anomaly_detection_df["Label Transformed"].map(lambda x: "https://github.com/hackforla/website/issues?q=is%3Aopen+is%3Aissue+label%3A"+str(x) if pd.isna(x) == False else np.nan)
+anomaly_detection_df["Link for Quick Correction"] = anomaly_detection_df["Label Transformed"].map(lambda x: "https://github.com/hackforla/website/issues?q=is%3Aissue+label%3A"+str(x) if pd.isna(x) == False else np.nan)
 
 anomaly_detection_df.drop(columns = ["Label Transformed"], inplace = True)
 
@@ -1913,16 +1913,27 @@ anomaly_detection_df2_base.drop(columns = ["outdated_label"], inplace = True)
 anomaly_detection_df2_base.drop(columns = ["unknown_label"], inplace = True)
 anomaly_detection_df2_base.drop(columns = ["Link for Quick Correction"], inplace = True)
 
-anomaly_detection_df2_base["Complexity Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if (re.search(r"(complexity|good first issue|prework)", str(x).lower())) else 0)
-anomaly_detection_df2_base["Feature Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if (re.search("feature", str(x).lower())) else 0)
-anomaly_detection_df2_base["Role Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if (re.search("role", str(x).lower())) else 0)
-anomaly_detection_df2_base["Size Label"]= anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if (re.search("size", str(x).lower())) else 0)
+# Includes official labels that are current and outdated
+official_complexity = list(LC_df[LC_df["label_series"] == "complexity"]["label_name"])
+official_feature = list(LC_df[LC_df["label_series"] == "feature"]["label_name"])
+official_role = list(LC_df[LC_df["label_series"] == "role"]["label_name"])
+official_size = list(LC_df[LC_df["label_series"] == "size"]["label_name"])
 
-anomaly_detection_df2_base["Complexity Missing Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if x == "Complexity: Missing" else 0)
-anomaly_detection_df2_base["Feature Missing Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if x == "Feature Missing" else 0)
-anomaly_detection_df2_base["Role Missing Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if x == "role missing" else 0)
-anomaly_detection_df2_base["Size Missing Label"]= anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if x == "size: missing" else 0)
+anomaly_detection_df2_base["Complexity Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if x in official_complexity else 0)
+anomaly_detection_df2_base["Feature Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if x in official_feature else 0)
+anomaly_detection_df2_base["Role Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if x in official_role else 0)
+anomaly_detection_df2_base["Size Label"]= anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if x in official_size else 0)
 
+complexity_missing_series = list(LC_df[(LC_df["label_series"] == "complexity") & (LC_df["missing_series?"] == "Yes")]["label_name"])[0]
+feature_missing_series = list(LC_df[(LC_df["label_series"] == "feature") & (LC_df["missing_series?"] == "Yes")]["label_name"])[0]
+role_missing_series = list(LC_df[(LC_df["label_series"] == "role") & (LC_df["missing_series?"] == "Yes")]["label_name"])[0]
+size_missing_series = list(LC_df[(LC_df["label_series"] == "size") & (LC_df["missing_series?"] == "Yes")]["label_name"])[0]
+
+anomaly_detection_df2_base["Complexity Missing Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if x == complexity_missing_series else 0)
+anomaly_detection_df2_base["Feature Missing Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if x == feature_missing_series else 0)
+anomaly_detection_df2_base["Role Missing Label"] = anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if x == role_missing_series else 0)
+anomaly_detection_df2_base["Size Missing Label"]= anomaly_detection_df2_base["labels.name"].map(lambda x: 1 if x == size_missing_series else 0)
+ 
 anomaly_detection_df2 = anomaly_detection_df2_base.groupby(["Project Board Column", "Runtime", "html_url", "title"])[["Complexity Label", "Feature Label", "Role Label", "Size Label", "Complexity Missing Label", "Feature Missing Label", "Role Missing Label", "Size Missing Label"]].sum().reset_index()
 
 anomaly_detection_df2["Complexity defined label"] = anomaly_detection_df2["Complexity Label"]-anomaly_detection_df2["Complexity Missing Label"]
