@@ -1161,8 +1161,53 @@ final_QA_review2 = final_QA_review[["Runtime", "labels.name", "html_url", "title
 
 # ### Create Data Source for Dashboard
 
-# In[26]:
+# In[48]:
 
+from google.oauth2 import service_account
+from gspread_dataframe import set_with_dataframe
+from googleapiclient.discovery import build
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+
+import gspread
+import base64
+
+scopes = ['https://www.googleapis.com/auth/spreadsheets',
+          'https://www.googleapis.com/auth/drive']
+
+## Read in offical GitHub labels from Google spreadsheet for weekly label check table
+
+key_base64 = os.environ["BASE64_PROJECT_BOARD_GOOGLECREDENTIAL"]
+base64_bytes = key_base64.encode('ascii')
+key_base64_bytes = base64.b64decode(base64_bytes)
+key_content = key_base64_bytes.decode('ascii')
+
+service_account_info = json.loads(key_content)
+
+credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes = scopes)
+
+service_sheets = build('sheets', 'v4', credentials = credentials)
+print(service_sheets)
+
+gc = gspread.authorize(credentials)
+
+gauth = GoogleAuth()
+drive = GoogleDrive(gauth)
+
+from gspread_dataframe import set_with_dataframe
+
+LabelCheck_GOOGLE_SHEETS_ID = '1-ltg0qMeZSgOnqrCU0nKUDQd1JOXTMWrNTK63VZjXdk'
+
+LabelCheck_sheet_name = 'Official GitHub Labels'
+
+gs = gc.open_by_key(LabelCheck_GOOGLE_SHEETS_ID)
+
+LabelCheck_worksheet = gs.worksheet(LabelCheck_sheet_name)
+
+LC_spreadsheet_data = LabelCheck_worksheet.get_all_records()
+LC_df = pd.DataFrame.from_dict(LC_spreadsheet_data)
+
+# In[26]:
 
 icebox_role = final_icebox2[final_icebox2["labels.name"].str.contains("role")]
 icebox_complexity = final_icebox2[final_icebox2["labels.name"].isin(complexity_labels)]
@@ -1205,10 +1250,18 @@ icebox_dataset2["Unknown Status"] = icebox_dataset2["html_url"].map(lambda x: 0 
 icebox_unique_roles = [x for x in icebox_dataset2["Role Label"].unique() if pd.isna(x) == False]
 icebox_unique_roles2 = [x for x in icebox_unique_roles if x != "role: front end and backend/DevOps"]
 icebox_unique_complexity = [x for x in icebox_dataset2["Complexity Label"].unique() if pd.isna(x) == False]  
-static_link_1_base_icebox = 'https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22ready+for+product%22+-label%3A%22ready+for+design+lead%22+-label%3A%22ready+for+org+rep%22+-label%3A%22dependency%22'
+static_link_base_icebox = 'https://github.com/hackforla/website/projects/7?card_filter_query=-label%3Adraft%22+-label%3A%22dependency%22'
+
+# Transform all ready series labels and add them to the status link
+ready_labels = list(LC_df[LC_df["label_series"] == "ready"]["label_name"].unique())
+ready_labels_append = ""
+for label in ready_labels:
+    ready_labels_transformed = label.lower().replace(":", "%3A").replace(" ", "+")
+    ready_labels_append = ready_labels_append+"+-label%3A%22"+ ready_labels_transformed+"%22"
+    
+static_link_base_icebox = static_link_base_icebox + ready_labels_append
 
 # In[29]:
-
 
 icebox_link_dict = { }
 
@@ -1217,14 +1270,14 @@ for role in icebox_unique_roles:
     for complexity in icebox_unique_complexity:
         role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
         complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-        icebox_link_dict[role][complexity] = static_link_1_base_icebox+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+        icebox_link_dict[role][complexity] = static_link_base_icebox+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
 
 icebox_link_dict["role: front end and backend/DevOps"] = {}     
 for complexity in icebox_unique_complexity:
     frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
     backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
     complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-    icebox_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base_icebox+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    icebox_link_dict["role: front end and backend/DevOps"][complexity] = static_link_base_icebox+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
 
 
 # In[30]:
@@ -1279,12 +1332,11 @@ ER_dataset2 = ER_dataset[["Project Board Column", "Runtime", "Role Label", "Comp
 
 
 # Create a column to identify issues with unknown status
-static_link_1_base = 'https://github.com/hackforla/website/projects/7?card_filter_query=-label%3A%22ready+for+prioritization%22+-label%3Adraft+-label%3A%22ready+for+dev+lead%22+-label%3A%22ready+for+product%22+-label%3A%22ready+for+design+lead%22+-label%3A%22ready+for+org+rep%22'
+static_link_base = 'https://github.com/hackforla/website/projects/7?card_filter_query=-label%3Adraft' + ready_labels_append
 ER_unknown_status_wdataset = ER_issues_df2.copy()
 ER_unknown_status_wdataset["Known Status"] = ER_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
 ER_known_status_issues = list(ER_unknown_status_wdataset[ER_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
 ER_dataset2["Unknown Status"] = ER_dataset2["html_url"].map(lambda x: 0 if x in ER_known_status_issues else 1) 
-
 
 # In[34]:
 
@@ -1305,14 +1357,14 @@ for role in ER_unique_roles:
     for complexity in ER_unique_complexity:
         role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
         complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-        ER_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+        ER_link_dict[role][complexity] = static_link_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
 
 ER_link_dict["role: front end and backend/DevOps"] = {}     
 for complexity in ER_unique_complexity:
     frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
     backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
     complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-    ER_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    ER_link_dict["role: front end and backend/DevOps"][complexity] = static_link_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
 
 
 # In[36]:
@@ -1381,14 +1433,14 @@ for role in NIA_unique_roles:
     for complexity in NIA_unique_complexity:
         role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
         complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-        NIA_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+        NIA_link_dict[role][complexity] = static_link_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
 
 NIA_link_dict["role: front end and backend/DevOps"] = {}     
 for complexity in NIA_unique_complexity:
     frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
     backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
     complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-    NIA_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    NIA_link_dict["role: front end and backend/DevOps"][complexity] = static_link_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
     
 NIA_dataset2["Role-based Link for Unknown Status"] = ""
 for role in NIA_link_dict.keys():
@@ -1448,14 +1500,14 @@ for role in pb_unique_roles:
     for complexity in pb_unique_complexity:
         role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
         complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-        pb_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+        pb_link_dict[role][complexity] = static_link_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
 
 pb_link_dict["role: front end and backend/DevOps"] = {}     
 for complexity in pb_unique_complexity:
     frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
     backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
     complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-    pb_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    pb_link_dict["role: front end and backend/DevOps"][complexity] = static_link_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
     
 pb_dataset2["Role-based Link for Unknown Status"] = ""
 for role in pb_link_dict.keys():
@@ -1516,14 +1568,14 @@ for role in IP_unique_roles:
     for complexity in IP_unique_complexity:
         role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
         complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-        IP_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+        IP_link_dict[role][complexity] = static_link_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
 
 IP_link_dict["role: front end and backend/DevOps"] = {}     
 for complexity in IP_unique_complexity:
     frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
     backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
     complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-    IP_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    IP_link_dict["role: front end and backend/DevOps"][complexity] = static_link_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
     
 IP_dataset2["Role-based Link for Unknown Status"] = ""
 for role in IP_link_dict.keys():
@@ -1586,14 +1638,14 @@ for role in Q_unique_roles:
     for complexity in Q_unique_complexity:
         role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
         complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-        Q_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+        Q_link_dict[role][complexity] = static_link_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
 
 Q_link_dict["role: front end and backend/DevOps"] = {}     
 for complexity in Q_unique_complexity:
     frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
     backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
     complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-    Q_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    Q_link_dict["role: front end and backend/DevOps"][complexity] = static_link_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
     
 Q_dataset2["Role-based Link for Unknown Status"] = ""
 for role in Q_link_dict.keys():
@@ -1656,14 +1708,14 @@ for role in QA_unique_roles:
     for complexity in QA_unique_complexity:
         role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
         complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-        QA_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+        QA_link_dict[role][complexity] = static_link_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
 
 QA_link_dict["role: front end and backend/DevOps"] = {}     
 for complexity in QA_unique_complexity:
     frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
     backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
     complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-    QA_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    QA_link_dict["role: front end and backend/DevOps"][complexity] = static_link_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
     
 QA_dataset2["Role-based Link for Unknown Status"] = ""
 for role in QA_link_dict.keys():
@@ -1725,14 +1777,14 @@ for role in UAT_unique_roles:
     for complexity in UAT_unique_complexity:
         role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
         complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-        UAT_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+        UAT_link_dict[role][complexity] = static_link_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
 
 UAT_link_dict["role: front end and backend/DevOps"] = {}     
 for complexity in UAT_unique_complexity:
     frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
     backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
     complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-    UAT_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    UAT_link_dict["role: front end and backend/DevOps"][complexity] = static_link_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
     
 UAT_dataset2["Role-based Link for Unknown Status"] = ""
 for role in UAT_link_dict.keys():
@@ -1795,14 +1847,14 @@ for role in QA_review_unique_roles:
     for complexity in QA_review_unique_complexity:
         role_transformed = role.lower().replace(":", "%3A").replace(" ", "+")
         complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-        QA_review_link_dict[role][complexity] = static_link_1_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+        QA_review_link_dict[role][complexity] = static_link_base+"+label%3A%22"+role_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
 
 QA_review_link_dict["role: front end and backend/DevOps"] = {}     
 for complexity in QA_review_unique_complexity:
     frontend_transformed = "role: front end".lower().replace(":", "%3A").replace(" ", "+")
     backend_transformed = "role: back end/devOps".lower().replace(":", "%3A").replace(" ", "+")
     complexity_transformed = complexity.lower().replace(":", "%3A").replace(" ", "+")
-    QA_review_link_dict["role: front end and backend/DevOps"][complexity] = static_link_1_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
+    QA_review_link_dict["role: front end and backend/DevOps"][complexity] = static_link_base+"+label%3A%22"+frontend_transformed+"%22"+"+label%3A%22"+backend_transformed+"%22"+"+label%3A%22"+complexity_transformed+"%22"
     
 QA_review_dataset2["Role-based Link for Unknown Status"] = ""
 for role in QA_review_link_dict.keys():
@@ -1841,56 +1893,6 @@ anomaly_detection = pd.concat([icebox_issues_df3, ER_issues_df3, NIA_issues_df3,
 anomaly_detection["keep"] = anomaly_detection["labels.name"].map(lambda x: 1 if (re.search(r"(size|feature|role|complexity|good first issue|prework|^$)", str(x).lower())) else 0)
 anomaly_detection_df = anomaly_detection[anomaly_detection["keep"] == 1]
 anomaly_detection_df.drop(columns = ["keep"], inplace = True)
-
-
-# ### Send Data to Google Sheets
-
-# In[48]:
-
-
-from google.oauth2 import service_account
-from gspread_dataframe import set_with_dataframe
-from googleapiclient.discovery import build
-from pydrive.auth import GoogleAuth
-from pydrive.drive import GoogleDrive
-
-import gspread
-import base64
-
-scopes = ['https://www.googleapis.com/auth/spreadsheets',
-          'https://www.googleapis.com/auth/drive']
-
-## Read in offical GitHub labels from Google spreadsheet for weekly label check table
-
-key_base64 = os.environ["BASE64_PROJECT_BOARD_GOOGLECREDENTIAL"]
-base64_bytes = key_base64.encode('ascii')
-key_base64_bytes = base64.b64decode(base64_bytes)
-key_content = key_base64_bytes.decode('ascii')
-
-service_account_info = json.loads(key_content)
-
-credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes = scopes)
-
-service_sheets = build('sheets', 'v4', credentials = credentials)
-print(service_sheets)
-
-gc = gspread.authorize(credentials)
-
-gauth = GoogleAuth()
-drive = GoogleDrive(gauth)
-
-from gspread_dataframe import set_with_dataframe
-
-LabelCheck_GOOGLE_SHEETS_ID = '1-ltg0qMeZSgOnqrCU0nKUDQd1JOXTMWrNTK63VZjXdk'
-
-LabelCheck_sheet_name = 'Official GitHub Labels'
-
-gs = gc.open_by_key(LabelCheck_GOOGLE_SHEETS_ID)
-
-LabelCheck_worksheet = gs.worksheet(LabelCheck_sheet_name)
-
-LC_spreadsheet_data = LabelCheck_worksheet.get_all_records()
-LC_df = pd.DataFrame.from_dict(LC_spreadsheet_data)
 
 outdated_labels = list(LC_df[LC_df["in_use?"] == "No"]["label_name"].unique())
 official_active_labels = list(set(list(LC_df["label_name"])).difference(set(outdated_labels)))
@@ -2026,6 +2028,8 @@ if len(complexity_missing_emptycomment) == 0:
     complexity_missing_emptycomment.loc[0] = [" "," "," "," "," "]
 else:
     complexity_missing_emptycomment
+
+# ### Send Data to Google Sheets
 
 ### Send to Google Sheet
 
