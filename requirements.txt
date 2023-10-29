@@ -4,9 +4,12 @@ numpy==1.23.5
 pytz==2022.7
 gspread == 5.9.0
 IPython
---upgrade google-auth
---upgrade google-api-python-client
---upgrade google-auth-httplib2
---upgrade google-auth-oauthlib
 gspread-dataframe
 pydrive
+
+# pip install --upgrade google-auth
+# pip install --upgrade google-api-python-client
+# pip install --upgrade google-auth-httplib2
+# pip install --upgrade google-auth-oauthlib
+# pip install gspread-dataframe
+# pip install pydrive
