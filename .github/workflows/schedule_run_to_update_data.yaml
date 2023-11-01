@@ -27,6 +27,7 @@ jobs:
           pip install --upgrade google-api-python-client
           pip install --upgrade google-auth-httplib2
           pip install --upgrade google-auth-oauthlib
+          pip install chardet
       
       - name: caching Python requirements in requirements.txt
         id: cache-python
