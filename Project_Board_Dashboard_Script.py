@@ -218,14 +218,11 @@ tz_LA = pytz.timezone('US/Pacific')
 # Get the current time in New York
 datetime_LA = datetime.now(tz_LA)
 
-# Format the time as a string and print it
-print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
-
+# Format the time as a string and add it in Runtime column
 icebox_issues_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
 
 
 # In[13]:
-
 
 icebox_issues_df.drop(columns = ['url', 'repository_url', 'labels_url', 'comments_url', 'events_url', 'id',
  'node_id', 'number', 'state', 'locked', 'assignee', 'assignees', 'comments', 'created_at',
@@ -354,9 +351,7 @@ tz_LA = pytz.timezone('US/Pacific')
 # Get the current time in New York
 datetime_LA = datetime.now(tz_LA)
 
-# Format the time as a string and print it
-print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
-
+# Format the time as a string and add to Runtime column
 ER_issues_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
 
 # Drop unneeded columns
@@ -412,9 +407,7 @@ ER_no_labels_df = ER_issues_df[ER_issues_df["html_url"].isin(ER_no_labels)][["Ru
 ER_no_labels_df["labels.name"] = ""
 ER_no_labels_df = ER_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
-# CHANGES MADE HERE!!!!!
 ER_issues_df3 = pd.concat([ER_issues_df2, ER_no_labels_df], ignore_index = True)
-########################################################################################
 
 ER_issues_df3["Project Board Column"] = "2- ER"
 
@@ -465,9 +458,7 @@ tz_LA = pytz.timezone('US/Pacific')
 # Get the current time in New York
 datetime_LA = datetime.now(tz_LA)
 
-# Format the time as a string and print it
-print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
-
+# Format the time as a string and add to Runtime column
 NIA_issues_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
 
 # Drop unneeded columns
@@ -521,9 +512,7 @@ NIA_no_labels_df = NIA_issues_df[NIA_issues_df["html_url"].isin(NIA_no_labels)][
 NIA_no_labels_df["labels.name"] = ""
 NIA_no_labels_df = NIA_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
-# CHANGES MADE HERE!!!!!
 NIA_issues_df3 = pd.concat([NIA_issues_df2, NIA_no_labels_df], ignore_index = True)
-#############################################################################################
 
 NIA_issues_df3["Project Board Column"] = "3 - New Issue Approval"
 len(NIA_issues_df3)
@@ -574,9 +563,7 @@ tz_LA = pytz.timezone('US/Pacific')
 # Get the current time in New York
 datetime_LA = datetime.now(tz_LA)
 
-# Format the time as a string and print it
-print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
-
+# Format the time as a string and add to Runtime column
 pb_issues_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
 
 # Drop unneeded columns
@@ -628,9 +615,7 @@ pb_no_labels_df = pb_issues_df[pb_issues_df["html_url"].isin(pb_no_labels)][["Ru
 pb_no_labels_df["labels.name"] = ""
 pb_no_labels_df = pb_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
-# CHANGES MADE HERE!!!!!
 pb_issues_df3 = pd.concat([pb_issues_df2, pb_no_labels_df], ignore_index = False)
-##############################################################################################################
 
 pb_issues_df3["Project Board Column"] = "4 - Prioritized Backlog"
 
@@ -677,9 +662,7 @@ tz_LA = pytz.timezone('US/Pacific')
 # Get the current time in New York
 datetime_LA = datetime.now(tz_LA)
 
-# Format the time as a string and print it
-print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
-
+# Format the time as a string and add it to Runtime column
 ip_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
 
 # Drop unneeded columns
@@ -734,9 +717,7 @@ ip_no_labels_df = ip_df[ip_df["html_url"].isin(ip_no_labels)][["Runtime", "html_
 ip_no_labels_df["labels.name"] = ""
 ip_no_labels_df = ip_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
-# CHANGES MADE HERE!!!!!
 ip_issues_df3 = pd.concat([ip_df2, ip_no_labels_df], ignore_index = True)
-#############################################################################################
 
 ip_issues_df3["Project Board Column"] = "5 - In Progress"
 
@@ -782,8 +763,7 @@ tz_LA = pytz.timezone('US/Pacific')
 # Get the current time in New York
 datetime_LA = datetime.now(tz_LA)
 
-# Format the time as a string and print it
-print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
+# Format the time as a string and add to Runtime column
 
 questions_issues_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
 
