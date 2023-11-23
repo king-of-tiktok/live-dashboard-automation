@@ -764,7 +764,6 @@ tz_LA = pytz.timezone('US/Pacific')
 datetime_LA = datetime.now(tz_LA)
 
 # Format the time as a string and add to Runtime column
-
 questions_issues_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
 
 # Drop unneeded columns
@@ -815,9 +814,8 @@ questions_no_labels_df = questions_issues_df[questions_issues_df["html_url"].isi
 questions_no_labels_df["labels.name"] = ""
 questions_no_labels_df = questions_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
-# CHANGES MADE HERE!!!!!
+
 questions_issues_df3 = pd.concat([questions_issues_df2, questions_no_labels_df], ignore_index = True)
-###################################################################################
 
 questions_issues_df3["Project Board Column"] = "6 - Questions/ In Review"
 
@@ -863,9 +861,7 @@ tz_LA = pytz.timezone('US/Pacific')
 # Get the current time in New York
 datetime_LA = datetime.now(tz_LA)
 
-# Format the time as a string and print it
-print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
-
+# Format the time as a string and add it to Runtime column
 QA_issues_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
 
 # Drop unneeded columns
@@ -916,9 +912,7 @@ QA_no_labels_df = QA_issues_df[QA_issues_df["html_url"].isin(QA_no_labels)][["Ru
 QA_no_labels_df["labels.name"] = ""
 QA_no_labels_df = QA_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
-# CHANGES MADE HERE!!!!!
 QA_issues_df3 = pd.concat([QA_issues_df2, QA_no_labels_df], ignore_index = True)
-##############################################################################################################
 
 QA_issues_df3["Project Board Column"] = "7 - QA"
 
@@ -964,9 +958,7 @@ tz_LA = pytz.timezone('US/Pacific')
 # Get the current time in New York
 datetime_LA = datetime.now(tz_LA)
 
-# Format the time as a string and print it
-print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
-
+# Format the time as a string and add it to Runtime column
 UAT_issues_df["Runtime"] = "LA time: "+ datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
 
 # Drop unneeded columns
@@ -1017,9 +1009,7 @@ UAT_no_labels_df = UAT_issues_df[UAT_issues_df["html_url"].isin(UAT_no_labels)][
 UAT_no_labels_df["labels.name"] = ""
 UAT_no_labels_df = UAT_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
-# CHANGES MADE HERE!!!!!
 UAT_issues_df3 = pd.concat([UAT_issues_df2, UAT_no_labels_df], ignore_index = True)
-###############################################################################################################
 
 UAT_issues_df3["Project Board Column"] = "8 - UAT"
 
@@ -1065,9 +1055,7 @@ tz_LA = pytz.timezone('US/Pacific')
 # Get the current time in New York
 datetime_LA = datetime.now(tz_LA)
 
-# Format the time as a string and print it
-print("LA time:", datetime_LA.strftime("%m/%d/%Y %H:%M:%S"))
-
+# Format the time as a string and add it to Runtime column
 QA_review_issues_df["Runtime"] = "LA time: "+datetime_LA.strftime("%m/%d/%Y %H:%M:%S")
 
 # Drop unneeded columns
@@ -1118,9 +1106,7 @@ QA_review_no_labels_df = QA_review_issues_df[QA_review_issues_df["html_url"].isi
 QA_review_no_labels_df["labels.name"] = ""
 QA_review_no_labels_df = QA_review_no_labels_df[["labels.name", "Runtime", "html_url", "title"]]
 
-# CHANGES MADE HERE!!!!!
 QA_review_issues_df3 = pd.concat([QA_review_issues_df2, QA_review_no_labels_df], ignore_index = True)
-#########################################################################################################################################
 
 QA_review_issues_df3["Project Board Column"] = "9 - QA (senior review)"
 
@@ -1167,7 +1153,6 @@ service_account_info = json.loads(key_content)
 credentials = service_account.Credentials.from_service_account_info(service_account_info, scopes = scopes)
 
 service_sheets = build('sheets', 'v4', credentials = credentials)
-print(service_sheets)
 
 gc = gspread.authorize(credentials)
 
@@ -1279,7 +1264,8 @@ for role in icebox_link_dict.keys():
 
 
 # In[32]:
-
+# Base link for unknown status for all other columns
+static_link_base = 'https://github.com/hackforla/website/projects/7?card_filter_query=-label%3Adraft' + ready_labels_append
 
 # Emergent Request
 
@@ -1312,7 +1298,6 @@ ER_dataset2 = ER_dataset[["Project Board Column", "Runtime", "Role Label", "Comp
 
 
 # Create a column to identify issues with unknown status
-static_link_base = 'https://github.com/hackforla/website/projects/7?card_filter_query=-label%3Adraft' + ready_labels_append
 ER_unknown_status_wdataset = ER_issues_df2.copy()
 ER_unknown_status_wdataset["Known Status"] = ER_unknown_status_wdataset["labels.name"].map(lambda x: 1 if (re.search(r"(ready|draft)", str(x).lower())) else 0)
 ER_known_status_issues = list(ER_unknown_status_wdataset[ER_unknown_status_wdataset["Known Status"] == 1]["html_url"].unique())
@@ -1565,8 +1550,6 @@ for role in IP_link_dict.keys():
         indexes = df2.index
         IP_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = IP_link_dict[role][complexity]
 
-# IP_dataset2["General Link for Developer Unknown Status"] = ""
-
 
 # In[42]:
 
@@ -1634,8 +1617,6 @@ for role in Q_link_dict.keys():
         df2 = df[df["Complexity Label"] == complexity]
         indexes = df2.index
         Q_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = Q_link_dict[role][complexity]
-
-# Q_dataset2["General Link for Developer Unknown Status"] = ""
 
 
 # In[43]:
@@ -1774,8 +1755,6 @@ for role in UAT_link_dict.keys():
         indexes = df2.index
         UAT_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = UAT_link_dict[role][complexity]
 
-# UAT_dataset2["General Link for Developer Unknown Status"] = ""
-
 
 # In[45]:
 
@@ -1843,9 +1822,6 @@ for role in QA_review_link_dict.keys():
         df2 = df[df["Complexity Label"] == complexity]
         indexes = df2.index
         QA_review_dataset2.loc[indexes, "Role-based Link for Unknown Status"] = QA_review_link_dict[role][complexity]
-
-# QA_review_dataset2["General Link for Developer Unknown Status"] = ""
-
 
 # ### Combine Data from All Project Board Columns
 
