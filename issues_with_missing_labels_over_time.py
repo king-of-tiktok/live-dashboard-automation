@@ -7,31 +7,26 @@ import duckdb
 import requests
 from shillelagh.backends.apsw.db import connect
 
-github_token = os.environ["API_KEY_GITHUB_PROJECTBOARD_DASHBOARD"]
-github_user = os.environ["API_TOKEN_USERNAME"]
-response = requests.get(
-    "https://api.github.com/repos/hackforla/website/issues?state=all",
-    auth=("hackforla", github_token),
-)
-issues = response.json()
 
-# Link format
-# '<https://api.github.com/repositories/130000551/issues?page=2>; rel="next"'
-links = response.headers["Link"]
-links = links.split(",")
-next_link = links[1].split(";")[0].replace("<", "").replace(">", "").strip()
-last = parse_qs(urlparse(next_link).query)["page"][0]
-print("Last page:", last)
-page = 2
-while page <= int(last):
-    print(f"Fetching page: {page}/{last}")
+def get_issues(page = 1):
+    github_token = os.environ["API_KEY_GITHUB_PROJECTBOARD_DASHBOARD"]
+    github_user = os.environ["API_TOKEN_USERNAME"]
     response = requests.get(
-        "https://api.github.com/repos/hackforla/website/issues?state=all&page="
-        + str(page),
-        auth=("hackforla", github_token),
+        f"https://api.github.com/repos/hackforla/website/issues?state=all&page={page}&per_page=100",
+        auth=(github_user, github_token),
     )
-    issues.extend(response.json())
-    page += 1
+    issues = response.json()
+
+    links = response.headers["Link"]
+    links = links.split(",")
+    next_link = links[1].split(";")[0].replace("<", "").replace(">", "").strip()
+    last = parse_qs(urlparse(next_link).query)["page"][0]
+    return issues, last
+
+issues, last = get_issues()
+for page in range(2, int(last) + 1):
+    print(f"Fetching page: {page}/{last}")
+    issues.extend(get_issues(page))
 print("Number of issues:", len(issues))
 
 for issue in issues:
@@ -74,7 +69,7 @@ connection = connect(
 )
 
 SQL = """
-INSERT INTO "https://docs.google.com/spreadsheets/d/16yC91C_ZTJoAhG0qVWqpEZ9kREPraubcARfZi9bkFcY/" 
+INSERT INTO "https://docs.google.com/spreadsheets/d/16yC91C_ZTJoAhG0qVWqpEZ9kREPraubcARfZi9bkFcY/edit#gid=0" 
 SELECT * FROM df;
 """
 connection.execute(SQL)
