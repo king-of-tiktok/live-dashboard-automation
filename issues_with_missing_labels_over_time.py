@@ -7,7 +7,6 @@ import duckdb
 import requests
 from shillelagh.backends.apsw.db import connect
 
-
 github_token = os.environ["API_KEY_GITHUB_PROJECTBOARD_DASHBOARD"]
 github_user = os.environ["API_TOKEN_USERNAME"]
 response = requests.get(
@@ -74,9 +73,10 @@ connection = connect(
     },
 )
 
-cursor = connection.cursor()
 SQL = """
-INSERT INTO "https://docs.google.com/spreadsheets/d/16yC91C_ZTJoAhG0qVWqpEZ9kREPraubcARfZi9bkFcY/edit#gid=0"
-SELECT * FROM df
+INSERT INTO "https://docs.google.com/spreadsheets/d/16yC91C_ZTJoAhG0qVWqpEZ9kREPraubcARfZi9bkFcY/" 
+SELECT * FROM df;
 """
-cursor.execute(SQL)
+connection.execute(SQL)
+# kind of a hack to get the connection to close and prevent a segfault
+connection = connect(":memory:")
