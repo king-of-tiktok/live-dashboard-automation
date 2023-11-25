@@ -1223,8 +1223,15 @@ ready_labels_append = ""
 for label in ready_labels:
     ready_labels_transformed = label.lower().replace(":", "%3A").replace(" ", "+")
     ready_labels_append = ready_labels_append+"+-label%3A%22"+ ready_labels_transformed+"%22"
-    
-static_link_base_icebox = static_link_base_icebox + ready_labels_append
+
+# Transform all ignore series labels and add them to the status link
+ignore_labels = list(LC_df[LC_df["label_series"] == "ignore"]["label_name"].unique())
+ignore_labels_append = ""
+for label in ignore_labels:
+    ignore_labels_transformed = label.lower().replace(":", "%3A").replace(" ", "+")
+    ignore_labels_append = ignore_labels_append+"+-label%3A%22"+ ignore_labels_transformed+"%22"
+
+static_link_base_icebox = static_link_base_icebox + ready_labels_append + ignore_labels_append
 
 # In[29]:
 
@@ -1265,7 +1272,7 @@ for role in icebox_link_dict.keys():
 
 # In[32]:
 # Base link for unknown status for all other columns
-static_link_base = 'https://github.com/hackforla/website/projects/7?card_filter_query=-label%3Adraft' + ready_labels_append
+static_link_base = 'https://github.com/hackforla/website/projects/7?card_filter_query=-label%3Adraft' + ready_labels_append + ignore_labels_append
 
 # Emergent Request
 
