@@ -29,7 +29,7 @@ while page <= int(last):
     response = requests.get(
         "https://api.github.com/repos/hackforla/website/issues?state=all&page="
         + str(page),
-        headers={"Authorization": "Bearer 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"},
+        auth=("hackforla", github_token),
     )
     issues.extend(response.json())
     page += 1
