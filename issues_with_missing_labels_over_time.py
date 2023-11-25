@@ -15,6 +15,8 @@ def get_issues(page = 1):
         f"https://api.github.com/repos/hackforla/website/issues?state=all&page={page}&per_page=100",
         auth=(github_user, github_token),
     )
+    if response.status_code != 200:
+        raise requests.exceptions.HTTPError(response)
     issues = response.json()
 
     links = response.headers["Link"]
