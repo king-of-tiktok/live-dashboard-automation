@@ -19,7 +19,7 @@ import re
 
 
 GitHub_token = os.environ["API_KEY_GITHUB_PROJECTBOARD_DASHBOARD"]
-user = 'kimberlytanyh'
+user = os.environ['API_TOKEN_USERNAME']
 
 
 # ### Get Cards in Project Board Columns
