@@ -36,7 +36,6 @@ while page <= int(last):
 print("Number of issues:", len(issues))
 
 for issue in issues:
-    print(issue["labels"])
     issue["labels"] = ", ".join([label["name"] for label in issue["labels"]])
 
 with open("issues.json", "w") as f:
