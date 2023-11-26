@@ -18,7 +18,6 @@ def get_issues(page = 1):
     if response.status_code != 200:
         raise requests.exceptions.HTTPError(response)
     issues = response.json()
-
     links = response.headers["Link"]
     links = links.split(",")
     next_link = links[1].split(";")[0].replace("<", "").replace(">", "").strip()
@@ -28,7 +27,7 @@ def get_issues(page = 1):
 issues, last = get_issues()
 for page in range(2, int(last) + 1):
     print(f"Fetching page: {page}/{last}")
-    issues.extend(get_issues(page))
+    issues.extend(get_issues(page)[0])
 print("Number of issues:", len(issues))
 
 for issue in issues:
